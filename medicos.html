@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="Sistema de Prontuário Médico - Médicos" />
+        <meta name="author" content="" />
+        <title>Médicos - Sistema de Prontuário Médico</title>
+        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <style>
+            .actions {
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .card-body {
+                padding: 2rem;
+            }
+
+            table {
+                margin-top: 1rem;
+                border-spacing: 0 0.5rem;
+            }
+
+            table th {
+                background-color: #f8f9fa;
+                text-align: center;
+                padding: 0.75rem;
+            }
+
+            table td {
+                background-color: #ffffff;
+                text-align: center;
+                padding: 0.75rem;
+                border: 1px solid #dee2e6;
+            }
+        </style>
+    </head>
+    <body class="sb-nav-fixed">
+        <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+            <a class="navbar-brand ps-3" href="index.html">Prontuário Médico</a>
+            <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#"><i class="fas fa-bars"></i></button>
+            <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="#">Configurações</a></li>
+                        <li><a class="dropdown-item" href="#">Sair</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+        <div id="layoutSidenav">
+            <div id="layoutSidenav_nav">
+                <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                    <div class="sb-sidenav-menu">
+                        <div class="nav">
+                            <div class="sb-sidenav-menu-heading">Principal</div>
+                            <a class="nav-link" href="dashboard.html">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                                Dashboard
+                            </a>
+                            <div class="sb-sidenav-menu-heading">Gestão</div>
+                            <a class="nav-link" href="pacientes.html">
+                                <div class="sb-nav-link-icon"><i class="fas fa-user-injured"></i></div>
+                                Pacientes
+                            </a>
+                            <a class="nav-link active" href="medicos.html">
+                                <div class="sb-nav-link-icon"><i class="fas fa-user-md"></i></div>
+                                Médicos
+                            </a>
+                            <a class="nav-link" href="medicamentos.html">
+                                <div class="sb-nav-link-icon"><i class="fas fa-pills"></i></div>
+                                Medicamentos
+                            </a>
+
+                        </div>
+                    </div>
+                    <div class="sb-sidenav-footer">
+                        <div class="small">Logado como:</div>
+                        Administrador
+                    </div>
+                </nav>
+            </div>
+            <div id="layoutSidenav_content">
+                <main>
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Médicos</h1>
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Médicos</li>
+                        </ol>
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-table me-1"></i>
+                                    Lista de Médicos
+                                </div>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newDoctorModal">Novo Médico</button>
+                            </div>
+                            <div class="card-body">
+                                <table id="doctorTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>CRM</th>
+                                            <th>Especialidade</th>
+                                            <th>Contato</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Dr. Carlos Silva</td>
+                                            <td>12345-SP</td>
+                                            <td>Cardiologia</td>
+                                            <td>(11) 98765-4321</td>
+                                            <td class="actions">
+                                                <button class="btn btn-sm btn-info" onclick="viewDetails(this)">Detalhes</button>
+                                                <button class="btn btn-sm btn-warning" onclick="editRow(this)">Editar</button>
+                                                <button class="btn btn-sm btn-danger" onclick="deleteRow(this)">Excluir</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dra. Ana Oliveira</td>
+                                            <td>67890-RJ</td>
+                                            <td>Pediatria</td>
+                                            <td>(21) 99876-5432</td>
+                                            <td class="actions">
+                                                <button class="btn btn-sm btn-info" onclick="viewDetails(this)">Detalhes</button>
+                                                <button class="btn btn-sm btn-warning" onclick="editRow(this)">Editar</button>
+                                                <button class="btn btn-sm btn-danger" onclick="deleteRow(this)">Excluir</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+
+                <div class="modal fade" id="newDoctorModal" tabindex="-1" aria-labelledby="newDoctorModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="newDoctorModalLabel">Novo Médico</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="newDoctorForm">
+                                    <div class="mb-3">
+                                        <label for="doctorName" class="form-label">Nome</label>
+                                        <input type="text" class="form-control" id="doctorName" required />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="doctorCRM" class="form-label">CRM</label>
+                                        <input type="text" class="form-control" id="doctorCRM" required />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="doctorSpecialty" class="form-label">Especialidade</label>
+                                        <input type="text" class="form-control" id="doctorSpecialty" required />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="doctorContact" class="form-label">Contato</label>
+                                        <input type="text" class="form-control" id="doctorContact" required />
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" id="saveDoctorBtn">Salvar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="detailsModalLabel">Detalhes do Médico</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" id="detailsContent">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="py-4 bg-light mt-auto">
+                    <div class="container-fluid px-4">
+                        <div class="d-flex align-items-center justify-content-between small">
+                            <div class="text-muted">Copyright &copy; Mérito Health</div>
+                            <div>
+                                <a href="#">Política de Privacidade</a>
+                                &middot;
+                                <a href="#">Termos &amp; Condições</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+        <script>
+            const saveDoctorBtn = document.getElementById('saveDoctorBtn');
+
+            saveDoctorBtn.addEventListener('click', () => {
+                const name = document.getElementById('doctorName').value;
+                const crm = document.getElementById('doctorCRM').value;
+                const specialty = document.getElementById('doctorSpecialty').value;
+                const contact = document.getElementById('doctorContact').value;
+
+                if (name && crm && specialty && contact) {
+                    const table = document.getElementById('doctorTable').querySelector('tbody');
+
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td>${name}</td>
+                        <td>${crm}</td>
+                        <td>${specialty}</td>
+                        <td>${contact}</td>
+                        <td class="actions">
+                            <button class="btn btn-sm btn-info" onclick="viewDetails(this)">Detalhes</button>
+                            <button class="btn btn-sm btn-warning" onclick="editRow(this)">Editar</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteRow(this)">Excluir</button>
+                        </td>
+                    `;
+
+                    table.appendChild(newRow);
+
+                    document.getElementById('newDoctorForm').reset();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('newDoctorModal'));
+                    modal.hide();
+                }
+            });
+
+            function viewDetails(button) {
+                const row = button.closest('tr');
+                const details = Array.from(row.children).slice(0, 4).map(td => td.textContent);
+                const labels = ['Nome', 'CRM', 'Especialidade', 'Contato'];
+
+                const detailsHtml = details.map((detail, index) => `<p><strong>${labels[index]}:</strong> ${detail}</p>`).join('');
+                document.getElementById('detailsContent').innerHTML = detailsHtml;
+
+                const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+                modal.show();
+            }
+
+            function editRow(button) {
+                const row = button.closest('tr');
+                const cells = Array.from(row.children);
+                const [name, crm, specialty, contact] = cells.slice(0, 4).map(td => td.textContent);
+
+                document.getElementById('doctorName').value = name;
+                document.getElementById('doctorCRM').value = crm;
+                document.getElementById('doctorSpecialty').value = specialty;
+                document.getElementById('doctorContact').value = contact;
+
+                const modal = new bootstrap.Modal(document.getElementById('newDoctorModal'));
+                modal.show();
+
+                saveDoctorBtn.addEventListener('click', function updateRow() {
+                    cells[0].textContent = document.getElementById('doctorName').value;
+                    cells[1].textContent = document.getElementById('doctorCRM').value;
+                    cells[2].textContent = document.getElementById('doctorSpecialty').value;
+                    cells[3].textContent = document.getElementById('doctorContact').value;
+
+                    saveDoctorBtn.removeEventListener('click', updateRow);
+                });
+            }
+
+            function deleteRow(button) {
+                const row = button.closest('tr');
+                row.remove();
+            }
+        </script>
+    </body>
+</html>
