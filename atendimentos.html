@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Atendimentos - Mérito Health</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #eef1f5;
+      font-family: 'Poppins', sans-serif;
+      padding-bottom: 80px;
+    }
+    .container {
+      margin-top: 40px;
+      max-width: 900px;
+    }
+    .card {
+      border-radius: 16px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      background-color: #fff;
+    }
+    h2, h4 {
+      font-weight: 600;
+      color: #0d6efd;
+    }
+    .form-label {
+      font-weight: 500;
+    }
+    .btn-primary {
+      background-color: #0d6efd;
+      border: none;
+      font-weight: 500;
+    }
+    .btn-primary:hover {
+      background-color: #0b5ed7;
+    }
+    .list-group-item {
+      border: none;
+      background-color: #f8f9fa;
+      border-left: 4px solid #0d6efd;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+    .btn-voltar {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1000;
+      padding: 12px 20px;
+      font-size: 1rem;
+      border-radius: 50px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2 class="text-center mb-4">Registro de Atendimentos</h2>
+
+    <div class="card p-4">
+      <form id="formAtendimento">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="paciente" class="form-label">Paciente</label>
+            <input type="text" class="form-control" id="paciente" required>
+          </div>
+          <div class="col-md-6">
+            <label for="profissional" class="form-label">Profissional</label>
+            <input type="text" class="form-control" id="profissional" required>
+          </div>
+          <div class="col-md-6">
+            <label for="tipo" class="form-label">Tipo de Atendimento</label>
+            <select class="form-select" id="tipo">
+              <option selected disabled>Selecione</option>
+              <option>Consulta</option>
+              <option>Urgência</option>
+              <option>Retorno</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status">
+              <option>Realizado</option>
+              <option>Pendente</option>
+              <option>Cancelado</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="data" class="form-label">Data do Atendimento</label>
+            <input type="date" class="form-control" id="data" required>
+          </div>
+          <div class="col-md-6">
+            <label for="diagnostico" class="form-label">Diagnóstico</label>
+            <input type="text" class="form-control" id="diagnostico">
+          </div>
+          <div class="col-md-6">
+            <label for="cid" class="form-label">CID (opcional)</label>
+            <input type="text" class="form-control" id="cid">
+          </div>
+          <div class="col-12">
+            <label for="prescricao" class="form-label">Prescrição</label>
+            <textarea class="form-control" id="prescricao" rows="3"></textarea>
+          </div>
+          <div class="col-12">
+            <label for="observacoes" class="form-label">Observações</label>
+            <textarea class="form-control" id="observacoes" rows="3"></textarea>
+          </div>
+          <div class="col-12">
+            <label for="anexo" class="form-label">Anexar Arquivo (Exames, Receita etc.)</label>
+            <input type="file" class="form-control" id="anexo" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+          </div>
+        </div>
+        <div class="mt-4">
+          <button type="submit" class="btn btn-primary w-100">Salvar Atendimento</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="mt-5">
+      <h4>Atendimentos Registrados</h4>
+      <ul class="list-group mt-3" id="listaAtendimentos"></ul>
+    </div>
+  </div>
+
+  <a href="index.html" class="btn btn-outline-secondary btn-voltar">
+    ⬅ Voltar
+  </a>
+
+  <script>
+    const form = document.getElementById("formAtendimento");
+    const lista = document.getElementById("listaAtendimentos");
+
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const paciente = document.getElementById("paciente").value;
+      const profissional = document.getElementById("profissional").value;
+      const tipo = document.getElementById("tipo").value;
+      const status = document.getElementById("status").value;
+      const data = document.getElementById("data").value;
+      const diagnostico = document.getElementById("diagnostico").value;
+      const cid = document.getElementById("cid").value;
+      const prescricao = document.getElementById("prescricao").value;
+      const observacoes = document.getElementById("observacoes").value;
+      const anexo = document.getElementById("anexo").files[0];
+
+      const li = document.createElement("li");
+      li.className = "list-group-item";
+
+      let anexoHTML = '';
+      if (anexo) {
+        anexoHTML = `<br><small><strong>Anexo:</strong> ${anexo.name}</small>`;
+      }
+
+      li.innerHTML = `
+        <strong>${paciente}</strong> - com <strong>${profissional}</strong> (${tipo}) em <strong>${data}</strong><br>
+        <small><strong>Status:</strong> ${status} | <strong>Diagnóstico:</strong> ${diagnostico} ${cid ? `| CID: ${cid}` : ''}</small><br>
+        <small><strong>Prescrição:</strong> ${prescricao}</small><br>
+        <small><strong>Observações:</strong> ${observacoes}</small>
+        ${anexoHTML}
+      `;
+      lista.appendChild(li);
+      form.reset();
+    });
+  </script>
+
+</body>
+</html>
