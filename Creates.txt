@@ -1,0 +1,48 @@
+CREATE TABLE pacientes (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    cpf VARCHAR(14) UNIQUE NOT NULL,
+    data_nascimento DATE NOT NULL,
+    contato VARCHAR(15),
+    ativo BOOLEAN DEFAULT TRUE
+);
+
+
+CREATE TABLE medicos (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    crm VARCHAR(20) UNIQUE NOT NULL,
+    especialidade VARCHAR(50) NOT NULL,
+    contato VARCHAR(15)
+);
+
+
+CREATE TABLE medicamentos (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    principio_ativo VARCHAR(100),
+    fabricante VARCHAR(50),
+    data_validade DATE,
+    quantidade INT DEFAULT 0
+);
+
+
+CREATE TABLE consultas (
+    id SERIAL PRIMARY KEY,
+    paciente_id INT NOT NULL REFERENCES pacientes(id) ON DELETE CASCADE,
+    medico_id INT NOT NULL REFERENCES medicos(id) ON DELETE CASCADE,
+    data_consulta TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    diagnostico TEXT,
+    prescricao TEXT
+);
+
+Para login
+CREATE TABLE usuarios (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL, -- Deve ser armazenada como hash por segurança
+    nome VARCHAR(100),
+    perfil ENUM('ADMIN', 'USER') DEFAULT 'USER'
+);
+
+

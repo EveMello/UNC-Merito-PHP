@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Consentimentos - Mérito Health</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #eef1f5;
+      font-family: 'Poppins', sans-serif;
+      padding-bottom: 80px;
+    }
+    .container {
+      margin-top: 40px;
+      max-width: 900px;
+    }
+    .card {
+      border-radius: 16px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      background-color: #fff;
+    }
+    h2, h4 {
+      font-weight: 600;
+      color: #0d6efd;
+    }
+    .form-label {
+      font-weight: 500;
+    }
+    .btn-primary {
+      background-color: #0d6efd;
+      border: none;
+      font-weight: 500;
+    }
+    .btn-primary:hover {
+      background-color: #0b5ed7;
+    }
+    .list-group-item {
+      border: none;
+      background-color: #f8f9fa;
+      border-left: 4px solid #0d6efd;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .assinatura {
+      font-family: 'Brush Script MT', cursive;
+      font-size: 1.5rem;
+      color: #000;
+    }
+    .btn-voltar {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1000;
+      padding: 12px 20px;
+      font-size: 1rem;
+      border-radius: 50px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2 class="text-center mb-4">Consentimento do Paciente</h2>
+
+  <div class="card p-4">
+    <form id="formConsentimento">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="paciente" class="form-label">Nome do Paciente</label>
+          <input type="text" class="form-control" id="paciente" required>
+        </div>
+        <div class="col-md-6">
+          <label for="profissional" class="form-label">Profissional Responsável</label>
+          <input type="text" class="form-control" id="profissional" required>
+        </div>
+        <div class="col-md-6">
+          <label for="finalidade" class="form-label">Tipo/Finalidade</label>
+          <input type="text" class="form-control" id="finalidade" required>
+        </div>
+        <div class="col-md-6">
+          <label for="status" class="form-label">Status</label>
+          <select class="form-select" id="status">
+            <option>Assinado</option>
+            <option>Pendente</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Termo de Consentimento</label>
+          <div class="form-control" style="height: 200px; overflow-y: auto;">
+            <p>
+              Eu, paciente acima identificado, autorizo expressamente o profissional de saúde a realizar os procedimentos médicos e/ou tratamentos
+              necessários ao meu caso, conforme explicações prestadas de forma clara e objetiva. Estou ciente de que todas as informações fornecidas
+              serão mantidas em sigilo, respeitando-se as diretrizes da Lei Geral de Proteção de Dados (LGPD). Tenho ciência do meu direito de
+              esclarecer dúvidas, solicitar informações adicionais e revogar este consentimento a qualquer momento.
+            </p>
+            <p>
+              Declaro que li, compreendi e aceito os termos acima.
+            </p>
+          </div>
+        </div>
+        <div class="col-12">
+          <label for="observacoes" class="form-label">Observações</label>
+          <textarea class="form-control" id="observacoes" rows="2"></textarea>
+        </div>
+        <div class="col-12">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="aceite" required>
+            <label class="form-check-label" for="aceite">
+              Li e concordo com o Termo de Consentimento
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary w-100">Salvar Consentimento</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="mt-5">
+    <h4>Consentimentos Registrados</h4>
+    <ul class="list-group mt-3" id="listaConsentimentos"></ul>
+  </div>
+</div>
+
+<a href="index.html" class="btn btn-outline-secondary btn-voltar">
+  ⬅ Voltar
+</a>
+
+<!-- Modal de Visualização -->
+<div class="modal fade" id="modalVisualizar" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content p-3">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLabel">Detalhes do Consentimento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Paciente:</strong> <span id="modalPaciente"></span></p>
+        <p><strong>Profissional:</strong> <span id="modalProfissional"></span></p>
+        <p><strong>Finalidade:</strong> <span id="modalFinalidade"></span></p>
+        <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+        <p><strong>Data/Hora:</strong> <span id="modalData"></span></p>
+        <hr>
+        <div style="max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 8px;">
+          <p>
+            Eu, paciente acima identificado, autorizo expressamente o profissional de saúde a realizar os procedimentos médicos e/ou tratamentos
+            necessários ao meu caso, conforme explicações prestadas de forma clara e objetiva. Estou ciente de que todas as informações fornecidas
+            serão mantidas em sigilo, respeitando-se as diretrizes da Lei Geral de Proteção de Dados (LGPD). Tenho ciência do meu direito de
+            esclarecer dúvidas, solicitar informações adicionais e revogar este consentimento a qualquer momento.
+          </p>
+          <p>
+            Declaro que li, compreendi e aceito os termos acima.
+          </p>
+        </div>
+        <hr>
+        <p><strong>Assinatura:</strong></p>
+        <div class="assinatura" id="modalAssinatura"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById("formConsentimento");
+  const lista = document.getElementById("listaConsentimentos");
+
+  form.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const paciente = document.getElementById("paciente").value;
+    const profissional = document.getElementById("profissional").value;
+    const finalidade = document.getElementById("finalidade").value;
+    const status = document.getElementById("status").value;
+    const observacoes = document.getElementById("observacoes").value;
+    const data = new Date().toLocaleString();
+
+    const li = document.createElement("li");
+    li.className = "list-group-item";
+
+    li.innerHTML = `
+      <div>
+        <strong>${paciente}</strong><br>
+        <small>${finalidade} | ${status} | ${data}</small>
+      </div>
+      <button class="btn btn-sm btn-outline-primary" onclick="visualizarConsentimento('${paciente}', '${profissional}', '${finalidade}', '${status}', '${data}')">
+        Visualizar
+      </button>
+    `;
+
+    lista.appendChild(li);
+    form.reset();
+  });
+
+  function visualizarConsentimento(paciente, profissional, finalidade, status, data) {
+    document.getElementById("modalPaciente").innerText = paciente;
+    document.getElementById("modalProfissional").innerText = profissional;
+    document.getElementById("modalFinalidade").innerText = finalidade;
+    document.getElementById("modalStatus").innerText = status;
+    document.getElementById("modalData").innerText = data;
+    document.getElementById("modalAssinatura").innerText = paciente;
+
+    const modal = new bootstrap.Modal(document.getElementById('modalVisualizar'));
+    modal.show();
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

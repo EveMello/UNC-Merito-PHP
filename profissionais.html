@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Profissionais - Mérito Health</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #eef1f5;
+      font-family: 'Poppins', sans-serif;
+      padding-bottom: 80px;
+    }
+    .container {
+      margin-top: 40px;
+      max-width: 900px;
+    }
+    .card {
+      border-radius: 16px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      background-color: #fff;
+    }
+    h2, h4 {
+      font-weight: 600;
+      color: #0d6efd;
+    }
+    .form-label {
+      font-weight: 500;
+    }
+    .btn-primary {
+      background-color: #0d6efd;
+      border: none;
+      font-weight: 500;
+    }
+    .btn-primary:hover {
+      background-color: #0b5ed7;
+    }
+    .list-group-item {
+      border: none;
+      background-color: #f8f9fa;
+      border-left: 4px solid #0d6efd;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+    .btn-voltar {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1000;
+      padding: 12px 20px;
+      font-size: 1rem;
+      border-radius: 50px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2 class="text-center mb-4">Cadastro de Profissionais da Saúde</h2>
+
+  <div class="card p-4">
+    <form id="formProfissional">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="nome" class="form-label">Nome completo</label>
+          <input type="text" class="form-control" id="nome" required>
+        </div>
+        <div class="col-md-6">
+          <label for="genero" class="form-label">Gênero</label>
+          <select class="form-select" id="genero">
+            <option selected disabled>Selecione</option>
+            <option>Masculino</option>
+            <option>Feminino</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label for="especialidade" class="form-label">Especialidade</label>
+          <input type="text" class="form-control" id="especialidade" required>
+        </div>
+        <div class="col-md-6">
+          <label for="tipo" class="form-label">Tipo de Profissional</label>
+          <select class="form-select" id="tipo">
+            <option selected disabled>Selecione</option>
+            <option>Médico</option>
+            <option>Enfermeiro</option>
+            <option>Fisioterapeuta</option>
+            <option>Psicólogo</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label for="crm" class="form-label">Registro (CRM/COREN/CREFITO...)</label>
+          <input type="text" class="form-control" id="crm">
+        </div>
+        <div class="col-md-6">
+          <label for="dataIngresso" class="form-label">Data de Ingresso</label>
+          <input type="date" class="form-control" id="dataIngresso">
+        </div>
+        <div class="col-md-6">
+          <label for="email" class="form-label">E-mail</label>
+          <input type="email" class="form-control" id="email">
+        </div>
+        <div class="col-md-6">
+          <label for="telefone" class="form-label">Telefone</label>
+          <input type="tel" class="form-control" id="telefone">
+        </div>
+        <div class="col-md-12">
+          <label for="observacoes" class="form-label">Observações</label>
+          <textarea class="form-control" id="observacoes" rows="2"></textarea>
+        </div>
+        <div class="col-md-6">
+          <label for="status" class="form-label">Situação</label>
+          <select class="form-select" id="status">
+            <option>Ativo</option>
+            <option>Inativo</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary w-100">Salvar Profissional</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="mt-5">
+    <h4>Profissionais Cadastrados</h4>
+    <ul class="list-group mt-3" id="listaProfissionais"></ul>
+  </div>
+</div>
+
+<a href="index.html" class="btn btn-outline-secondary btn-voltar">
+  ⬅ Voltar
+</a>
+
+<script>
+  const form = document.getElementById("formProfissional");
+  const lista = document.getElementById("listaProfissionais");
+
+  form.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const nome = document.getElementById("nome").value;
+    const genero = document.getElementById("genero").value;
+    const especialidade = document.getElementById("especialidade").value;
+    const tipo = document.getElementById("tipo").value;
+    const crm = document.getElementById("crm").value;
+    const email = document.getElementById("email").value;
+    const telefone = document.getElementById("telefone").value;
+    const dataIngresso = document.getElementById("dataIngresso").value;
+    const status = document.getElementById("status").value;
+    const observacoes = document.getElementById("observacoes").value;
+
+    const li = document.createElement("li");
+    li.className = "list-group-item";
+    li.innerHTML = `
+      <strong>${nome}</strong> (${tipo} - ${especialidade})<br>
+      <small>Gênero: ${genero} | Registro: ${crm} | Ingresso: ${dataIngresso} | Status: ${status}</small><br>
+      <small>Email: ${email} | Tel: ${telefone}</small><br>
+      <small>Obs: ${observacoes}</small>
+    `;
+    lista.appendChild(li);
+    form.reset();
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

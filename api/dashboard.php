@@ -1,0 +1,25 @@
+<?php
+// api/dashboard.php
+header('Content-Type: application/json; charset=utf-8');
+require_once __DIR__ . '/../config/db.php';
+
+function countSafe(PDO $pdo, string $sql): int {
+  try { return (int)$pdo->query($sql)->fetchColumn(); } catch (Throwable $e) { return 0; }
+}
+
+$pacientes_total     = countSafe($pdo, "SELECT COUNT(*) FROM pacientes");
+$pacientes_ativos    = countSafe($pdo, "SELECT COUNT(*) FROM pacientes WHERE ativo = 1");
+$medicos_total       = countSafe($pdo, "SELECT COUNT(*) FROM medicos");
+$medicamentos_total  = countSafe($pdo, "SELECT COUNT(*) FROM medicamentos");
+
+// Se ainda não existem tabelas de consultas/exames/receitas, devolvemos 0.
+echo json_encode([
+  'ok'                  => true,
+  'pacientes_total'     => $pacientes_total,
+  'pacientes_ativos'    => $pacientes_ativos,
+  'medicos_total'       => $medicos_total,
+  'medicamentos_total'  => $medicamentos_total,
+  'consultas_agendadas' => 0,
+  'exames_pendentes'    => 0,
+  'receitas_emitidas'   => 0,
+], JSON_UNESCAPED_UNICODE);

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Geração de Receita - Sistema de Prontuário Médico</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="css/styles.css" rel="stylesheet" />
+  <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+  <style>
+    .actions{display:flex;gap:.5rem}
+    .card-body{padding:2rem}
+    .rx-item-row{gap:.5rem}
+    .rx-item-row .form-control,.rx-item-row .form-select{min-width:120px}
+    /* Área de impressão A5/A4 */
+    .print-wrap{background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:24px;max-width:900px;margin:auto}
+    .rx-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px}
+    .rx-header .clinic h4{margin:0}
+    .rx-patient{border:1px dashed #999;padding:10px;margin-bottom:12px}
+    .rx-items ol{padding-left:1.1rem}
+    .rx-footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:24px}
+    .assinatura{border-top:1px solid #000;text-align:center;padding-top:6px;min-width:260px}
+    @media print{
+      body{background:#fff}
+      .no-print{display:none!important}
+      #printArea{page-break-inside:avoid}
+      
+    }
+  </style>
+</head>
+<body class="sb-nav-fixed">
+  <!-- NAVBAR -->
+  <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <a class="navbar-brand ps-3" href="index.html">Prontuário Médico</a>
+    <button class="btn btn-link btn-sm me-4" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+  </nav>
+
+  <div id="layoutSidenav">
+    <!-- SIDEBAR -->
+    <div id="layoutSidenav_nav">
+      <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+        <div class="sb-sidenav-menu">
+          <div class="nav">
+            <div class="sb-sidenav-menu-heading">Principal</div>
+            <a class="nav-link" href="index.html"><div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>Dashboard</a>
+            <div class="sb-sidenav-menu-heading">Gestão</div>
+            <a class="nav-link" href="pacientes.html"><div class="sb-nav-link-icon"><i class="fas fa-user-injured"></i></div>Pacientes</a>
+            <a class="nav-link" href="medicos.html"><div class="sb-nav-link-icon"><i class="fas fa-user-md"></i></div>Médicos</a>
+            <a class="nav-link" href="medicamentos.html"><div class="sb-nav-link-icon"><i class="fas fa-pills"></i></div>Medicamentos</a>
+            <a class="nav-link active" href="receita.html"><div class="sb-nav-link-icon"><i class="fas fa-file-prescription"></i></div>Receitas</a>
+          </div>
+        </div>
+        <div class="sb-sidenav-footer"><div class="small">Logado como:</div>Administrador</div>
+      </nav>
+    </div>
+
+    <!-- CONTEÚDO -->
+    <div id="layoutSidenav_content">
+      <main>
+        <div class="container-fluid px-4">
+          <h1 class="mt-4">Geração de Receita</h1>
+          <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+            <li class="breadcrumb-item active">Receitas</li>
+          </ol>
+
+          <div class="row">
+            <div class="col-12 col-xl-6">
+              <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-edit me-1"></i>Dados da Receita</div>
+                <div class="card-body">
+                  <div id="alertArea"></div>
+                  <form id="rxForm">
+                    <div class="mb-3">
+                      <label class="form-label">Paciente</label>
+                      <select id="paciente_id" class="form-select" required></select>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Médico</label>
+                      <select id="medico_id" class="form-select" required></select>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Data de Emissão</label>
+                      <input type="date" id="data_emissao" class="form-control" required>
+                    </div>
+
+                    <div class="mb-2 d-flex justify-content-between align-items-center">
+                      <label class="form-label m-0">Itens da Receita</label>
+                      <button type="button" class="btn btn-sm btn-outline-primary" id="addItem"><i class="fas fa-plus"></i> Item</button>
+                    </div>
+                    <div id="itensWrap"></div>
+
+                    <div class="mb-3 mt-2">
+                      <label class="form-label">Observações</label>
+                      <textarea id="observacoes" class="form-control" rows="2" placeholder="Ex.: Orientações gerais, alergias, etc."></textarea>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                      <button type="button" class="btn btn-secondary no-print" id="btnPreview">Pré-visualizar</button>
+                      <button type="submit" class="btn btn-primary no-print" id="btnSalvar">Salvar & Imprimir</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-xl-6">
+              <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-file-alt me-1"></i>Pré-visualização</div>
+                <div class="card-body">
+                  <div id="printArea" class="print-wrap">
+                    <div class="rx-header">
+                      <div class="clinic">
+                        <h4>Mérito Health</h4>
+                        <div class="text-muted">Rua Exemplo, 123 — Cidade/UF — (00) 0000-0000</div>
+                      </div>
+                      <div class="rx-id text-end">
+                        <div><strong>Receita nº</strong> <span id="rxNumero">—</span></div>
+                        <div><strong>Data:</strong> <span id="rxData">—</span></div>
+                      </div>
+                    </div>
+
+                    <div class="rx-patient">
+                      <div><strong>Paciente:</strong> <span id="rxPaciente">—</span></div>
+                      <div><strong>CPF:</strong> <span id="rxCpf">—</span></div>
+                      <div><strong>Médico:</strong> <span id="rxMedico">—</span> | <strong>CRM:</strong> <span id="rxCrm">—</span></div>
+                    </div>
+
+                    <div class="rx-items">
+                      <ol id="rxItens"></ol>
+                    </div>
+
+                    <div class="mt-3"><strong>Observações:</strong><br><span id="rxObs">—</span></div>
+
+                    <div class="rx-footer">
+                      <div></div>
+                      <div class="assinatura">
+                        Assinatura e Carimbo do Médico
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mt-2 no-print d-flex gap-2">
+                    <button class="btn btn-outline-secondary" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
+                    <button class="btn btn-outline-dark" id="btnLimparPreview">Limpar Prévia</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> <!-- row -->
+        </div>
+      </main>
+
+      <footer class="py-4 bg-light mt-auto">
+        <div class="container-fluid px-4">
+          <div class="d-flex align-items-center justify-content-between small">
+            <div class="text-muted">Copyright &copy; Mérito Health</div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Endpoint da API em PHP (já criada anteriormente)
+    const API = 'api/receitas.php';
+
+    const alertArea = document.getElementById('alertArea');
+    const itensWrap = document.getElementById('itensWrap');
+
+    function showAlert(msg,type='success'){
+      alertArea.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
+    }
+
+    // monta uma linha de item
+    function makeItemRow(medOptions){
+      const row = document.createElement('div');
+      row.className = 'row rx-item-row align-items-end mb-2';
+      row.innerHTML = `
+        <div class="col-12 col-md-4">
+          <label class="form-label">Medicamento</label>
+          <select class="form-select rx_med">${medOptions}</select>
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label">Dosagem</label>
+          <input type="text" class="form-control rx_dos" placeholder="ex: 500mg">
+        </div>
+        <div class="col-12 col-md-4">
+          <label class="form-label">Posologia</label>
+          <input type="text" class="form-control rx_pos" placeholder="ex: 1 comp 8/8h por 5 dias">
+        </div>
+        <div class="col-6 col-md-1">
+          <label class="form-label">Qtd</label>
+          <input type="text" class="form-control rx_qt" placeholder="ex: 20">
+        </div>
+        <div class="col-6 col-md-1">
+          <label class="form-label">Duração</label>
+          <input type="text" class="form-control rx_dur" placeholder="ex: 5d">
+        </div>
+        <div class="col-12 col-md-12 mt-1">
+          <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.rx-item-row').remove()"><i class="fas fa-trash"></i></button>
+        </div>`;
+      return row;
+    }
+
+    // carregar listas (pacientes, médicos, medicamentos) da API
+    async function bootstrapData(){
+      const res = await fetch(API + '?bootstrap=1', { cache: 'no-store' });
+      const data = await res.json();
+
+      // paciente
+      const pacSel = document.getElementById('paciente_id');
+      pacSel.innerHTML = data.pacientes.map(p => `<option value="${p.id}" data-cpf="${p.cpf||''}">${p.nome}</option>`).join('');
+
+      // medico
+      const medSel = document.getElementById('medico_id');
+      medSel.innerHTML = data.medicos.map(m => `<option value="${m.id}" data-crm="${m.crm||''}" data-nome="${m.nome}">${m.nome} (${m.crm||''})</option>`).join('');
+
+      // medicamentos
+      const medOpts = data.medicamentos.map(md => {
+        const base = (md.dosagem ? ` ${md.dosagem}`:'') + (md.forma? ` - ${md.forma}`:'');
+        return `<option value="${md.id}" data-dos="${md.dosagem||''}">${md.nome}${base}</option>`;
+      }).join('');
+
+      // item inicial
+      itensWrap.appendChild(makeItemRow(medOpts));
+
+      // auto preencher dosagem quando trocar medicamento
+      itensWrap.addEventListener('change', (e)=>{
+        if(e.target.classList.contains('rx_med')){
+          const dos = e.target.selectedOptions[0].dataset.dos || '';
+          e.target.closest('.rx-item-row').querySelector('.rx_dos').value = dos;
+        }
+      });
+
+      // + item
+      document.getElementById('addItem').addEventListener('click', ()=> itensWrap.appendChild(makeItemRow(medOpts)));
+
+      // data = hoje
+      document.getElementById('data_emissao').value = new Date().toISOString().slice(0,10);
+    }
+
+    // pré-visualização
+    function fillPreview(receitaId=null){
+      const pacSel = document.getElementById('paciente_id');
+      const pacNome = pacSel.selectedOptions[0]?.textContent || '';
+      const pacCpf  = pacSel.selectedOptions[0]?.dataset.cpf || '';
+
+      const medSel = document.getElementById('medico_id');
+      const medNome= medSel.selectedOptions[0]?.dataset.nome || medSel.selectedOptions[0]?.textContent || '';
+      const crm    = medSel.selectedOptions[0]?.dataset.crm || '';
+
+      document.getElementById('rxNumero').textContent = receitaId ? receitaId : '—';
+      document.getElementById('rxData').textContent   = document.getElementById('data_emissao').value || '—';
+      document.getElementById('rxPaciente').textContent = pacNome || '—';
+      document.getElementById('rxCpf').textContent    = pacCpf || '—';
+      document.getElementById('rxMedico').textContent = medNome || '—';
+      document.getElementById('rxCrm').textContent    = crm || '—';
+      document.getElementById('rxObs').textContent    = document.getElementById('observacoes').value || '—';
+
+      const list = document.getElementById('rxItens');
+      list.innerHTML = '';
+      const rows = document.querySelectorAll('.rx-item-row');
+      rows.forEach((r)=>{
+        const medTxt = r.querySelector('.rx_med').selectedOptions[0]?.textContent || '';
+        const dos    = r.querySelector('.rx_dos').value.trim();
+        const pos    = r.querySelector('.rx_pos').value.trim();
+        const qt     = r.querySelector('.rx_qt').value.trim();
+        const dur    = r.querySelector('.rx_dur').value.trim();
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>${medTxt}</strong>${dos? ' — '+dos:''}<br><em>Posologia:</em> ${pos || '-'}${qt? ' | Qtd: '+qt:''}${dur? ' | Duração: '+dur:''}`;
+        list.appendChild(li);
+      });
+    }
+
+    document.getElementById('btnPreview').addEventListener('click', ()=> fillPreview());
+
+    document.getElementById('btnLimparPreview').addEventListener('click', ()=>{
+      document.getElementById('rxNumero').textContent = '—';
+      document.getElementById('rxItens').innerHTML = '';
+      document.getElementById('rxObs').textContent = '—';
+    });
+
+    // salvar & imprimir
+    document.getElementById('rxForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+
+      // montar payload
+      const itens = [];
+      document.querySelectorAll('.rx-item-row').forEach(r=>{
+        itens.push({
+          medicamento_id: parseInt(r.querySelector('.rx_med').value,10),
+          dosagem:   r.querySelector('.rx_dos').value.trim(),
+          posologia: r.querySelector('.rx_pos').value.trim(),
+          quantidade:r.querySelector('.rx_qt').value.trim(),
+          duracao:   r.querySelector('.rx_dur').value.trim()
+        });
+      });
+
+      const payload = {
+        paciente_id: parseInt(document.getElementById('paciente_id').value,10),
+        medico_id:   parseInt(document.getElementById('medico_id').value,10),
+        data_emissao:document.getElementById('data_emissao').value,
+        observacoes: document.getElementById('observacoes').value.trim(),
+        itens
+      };
+
+      try{
+        const res = await fetch(API, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error || 'Falha ao salvar receita.');
+        showAlert('Receita salva com sucesso! Número: '+data.receita_id);
+        fillPreview(data.receita_id);
+        // imprime
+        setTimeout(()=> window.print(), 300);
+      }catch(err){
+        showAlert(err.message, 'danger');
+      }
+    });
+
+    // init
+    bootstrapData();
+  </script>
+</body>
+</html>
