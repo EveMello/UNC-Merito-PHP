@@ -172,6 +172,30 @@
       alertArea.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
     }
 
+    //Buscar id do Agendamento selecionado
+    async function loadAtendimentoData() {
+      const params = new URLSearchParams(window.location.search);
+      const atendimentoId = params.get('atendimento_id');
+      if(!atendimentoId) return;
+
+      try {
+        const res = await fetch(`api/atendimentos.php?id=${atendimentoId}`);
+        const data = await res.json();
+        if(!data) return;
+
+        // Selecionar paciente
+        const pacSel = document.getElementById('paciente_id');
+        pacSel.value = data.paciente_id;
+
+        // Selecionar médico
+        const medSel = document.getElementById('medico_id');
+        medSel.value = data.medico_id;
+
+      } catch(e){
+        console.error('Erro ao carregar dados do atendimento:', e);
+      }
+    }
+
     // monta uma linha de item
     function makeItemRow(medOptions){
       const row = document.createElement('div');
@@ -322,8 +346,9 @@
       }
     });
 
-    // init
-    bootstrapData();
+    // Inicialização
+    await bootstrapData();
+    loadAtendimentoData();
   </script>
 </body>
 </html>

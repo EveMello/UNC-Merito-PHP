@@ -55,21 +55,26 @@
                   <a class="nav-link" href="pacientes.html">Lista de Pacientes</a>
                 </nav>
               </div>
-              <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseDoctors" aria-expanded="false" aria-controls="collapseDoctors">
-                <div class="sb-nav-link-icon"><i class="fas fa-user-md"></i></div>
-                Médicos
-                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-              </a>
-              <div class="collapse" id="collapseDoctors" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
+                <a class="nav-link" 
+                  href="#" 
+                  data-bs-toggle="collapse" 
+                  data-bs-target="#collapseDoctors" 
+                  aria-expanded="true" 
+                  aria-controls="collapseDoctors">
+                    <div class="sb-nav-link-icon"><i class="fas fa-user-md"></i></div>
+                    Médicos
+                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                </a>
+              <div class="collapse show" id="collapseDoctors" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
                 <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="medicos.html">Lista de Médicos</a>
+                  <a class="nav-link active" href="medicos.html">Lista de Médicos</a>
                 </nav>
               </div>
               <a class="nav-link" href="medicamentos.html">
                 <div class="sb-nav-link-icon"><i class="fas fa-pills"></i></div>
                 Medicamentos
               </a>
-            <a class="nav-link active" href="atendimentos.html"><div class="sb-nav-link-icon"><i class="fas fa-notes-medical"></i></div>Atendimentos</a>
+            <a class="nav-link" href="atendimentos.html"><div class="sb-nav-link-icon"><i class="fas fa-notes-medical"></i></div>Atendimentos</a>
             <a class="nav-link" href="receita.html"><div class="sb-nav-link-icon"><i class="fas fa-file-signature"></i></div>Receitas</a>
             </div>
           </div>
@@ -127,19 +132,19 @@
                   <input type="hidden" id="doctorId" />
                   <div class="mb-3">
                     <label for="doctorName" class="form-label">Nome</label>
-                    <input type="text" class="form-control" id="doctorName" required />
+                    <input type="text" class="form-control" id="doctorName" maxlength="100" required />
                   </div>
                   <div class="mb-3">
                     <label for="doctorCRM" class="form-label">CRM</label>
-                    <input type="text" class="form-control" id="doctorCRM" required />
+                    <input type="text" class="form-control" id="doctorCRM" maxlength="20" required />
                   </div>
                   <div class="mb-3">
                     <label for="doctorSpecialty" class="form-label">Especialidade</label>
-                    <input type="text" class="form-control" id="doctorSpecialty" required />
+                    <input type="text" class="form-control" id="doctorSpecialty" maxlength="50" required />
                   </div>
                   <div class="mb-3">
                     <label for="doctorContact" class="form-label">Contato</label>
-                    <input type="text" class="form-control" id="doctorContact" required />
+                    <input type="text" class="form-control" id="doctorContact" />
                   </div>
                 </form>
               </div>
@@ -222,7 +227,7 @@
               <td>${m.crm}</td>
               <td>${m.especialidade}</td>
               <td>${m.contato}</td>
-              <td class="actions">
+              <td class="actions justify-content-center">
                 <button class="btn btn-sm btn-info" data-action="detalhes">Detalhes</button>
                 <button class="btn btn-sm btn-warning" data-action="editar">Editar</button>
                 <button class="btn btn-sm btn-danger" data-action="excluir">Excluir</button>

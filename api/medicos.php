@@ -98,3 +98,21 @@ try {
   http_response_code(500);
   echo json_encode(['error' => 'Erro no servidor: '.$e->getMessage()]);
 }
+
+//Buscar para a tela de Atendimentos:
+header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
+
+include_once("../config/db.php");
+
+$stmt = $pdo->query("SELECT id, nome FROM profissionais ORDER BY nome");
+echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+
+//Listar no atendimento:
+try {
+    $stmt = $pdo->query("SELECT id, nome FROM medicos ORDER BY nome");
+    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+} catch (Throwable $e) {
+    http_response_code(500);
+    echo json_encode(['error' => $e->getMessage()]);
+}

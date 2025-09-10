@@ -45,15 +45,20 @@
                 Dashboard
               </a>
               <div class="sb-sidenav-menu-heading">Gestão</div>
-              <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePatients" aria-expanded="false" aria-controls="collapsePatients">
-                <div class="sb-nav-link-icon"><i class="fas fa-user-injured"></i></div>
-                Pacientes
-                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+              <a class="nav-link" 
+                href="#" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#collapsePatients" 
+                aria-expanded="true" 
+                aria-controls="collapsePatients">
+                  <div class="sb-nav-link-icon"><i class="fas fa-user-injured"></i></div>
+                  Pacientes
+                  <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
               </a>
-              <div class="collapse" id="collapsePatients" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
-                <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="pacientes.html">Lista de Pacientes</a>
-                </nav>
+              <div class="collapse show" id="collapsePatients" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                  <nav class="sb-sidenav-menu-nested nav">
+                      <a class="nav-link active" href="pacientes.html">Lista de Pacientes</a>
+                  </nav>
               </div>
               <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseDoctors" aria-expanded="false" aria-controls="collapseDoctors">
                 <div class="sb-nav-link-icon"><i class="fas fa-user-md"></i></div>
@@ -69,7 +74,7 @@
                 <div class="sb-nav-link-icon"><i class="fas fa-pills"></i></div>
                 Medicamentos
               </a>
-             <a class="nav-link active" href="atendimentos.html"><div class="sb-nav-link-icon"><i class="fas fa-notes-medical"></i></div>Atendimentos</a>
+             <a class="nav-link" href="atendimentos.html"><div class="sb-nav-link-icon"><i class="fas fa-notes-medical"></i></div>Atendimentos</a>
             <a class="nav-link" href="receita.html"><div class="sb-nav-link-icon"><i class="fas fa-file-signature"></i></div>Receitas</a>
             </div>
           </div>
@@ -132,11 +137,11 @@
                   <input type="hidden" id="patientId" />
                   <div class="mb-3">
                     <label for="patientName" class="form-label">Nome</label>
-                    <input type="text" class="form-control" id="patientName" required />
+                    <input type="text" class="form-control" id="patientName" maxlength="100" required />
                   </div>
                   <div class="mb-3">
                     <label for="patientCPF" class="form-label">CPF</label>
-                    <input type="text" class="form-control" id="patientCPF" required />
+                    <input type="text" class="form-control" id="patientCPF" maxlength="14" required />
                   </div>
                   <div class="mb-3">
                     <label for="patientDOB" class="form-label">Data de Nascimento</label>
@@ -144,7 +149,7 @@
                   </div>
                   <div class="mb-3">
                     <label for="patientContact" class="form-label">Contato</label>
-                    <input type="text" class="form-control" id="patientContact" required />
+                    <input type="text" class="form-control" id="patientContact" maxlength="15" />
                   </div>
                   <div class="mb-3">
                     <label for="patientActive" class="form-label">Ativo</label>
@@ -238,7 +243,7 @@
               <td>${p.data_nascimento}</td>
               <td>${p.contato}</td>
               <td>${p.ativo ? 'Sim' : 'Não'}</td>
-              <td class="actions">
+              <td class="actions justify-content-center">
                 <button class="btn btn-sm btn-info" data-action="detalhes">Detalhes</button>
                 <button class="btn btn-sm btn-warning" data-action="editar">Editar</button>
                 <button class="btn btn-sm btn-danger" data-action="excluir">Excluir</button>

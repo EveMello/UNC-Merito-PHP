@@ -26,24 +26,50 @@ function save_upload($field, $destDir) {
 }
 
 try {
-  if ($method === 'GET') {
-    $stmt = $pdo->query("SELECT id, paciente, profissional, tipo, status, DATE_FORMAT(data_atendimento,'%Y-%m-%d') AS data_atendimento, diagnostico, cid, prescricao, observacoes, anexo FROM atendimentos ORDER BY id DESC");
-    echo json_encode($stmt->fetchAll());
-    exit;
-  }
+  if ($method === 'GET' && isset($_GET['id'])) {
+        $id = (int)$_GET['id'];
+        $stmt = $pdo->prepare("
+            SELECT a.id, a.paciente_id, p.nome AS paciente,
+                   a.medico_id, m.nome AS profissional,
+                   a.tipo, a.status, DATE_FORMAT(a.data_atendimento,'%Y-%m-%d') AS data_atendimento,
+                   a.diagnostico, a.cid, a.observacoes, a.anexo
+            FROM atendimentos a
+            INNER JOIN pacientes p ON p.id = a.paciente_id
+            INNER JOIN medicos m ON m.id = a.medico_id
+            WHERE a.id = :id
+        ");
+        $stmt->execute([':id' => $id]);
+        $atendimento = $stmt->fetch(PDO::FETCH_ASSOC);
+        echo json_encode($atendimento, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    // GET todos os atendimentos (para listagem)
+    if ($method === 'GET') {
+        $stmt = $pdo->query("
+            SELECT a.id, p.nome as paciente, m.nome as profissional, 
+                   a.tipo, a.status, DATE_FORMAT(a.data_atendimento,'%Y-%m-%d') AS data_atendimento, 
+                   a.diagnostico, a.cid, a.observacoes, a.anexo 
+            FROM atendimentos a
+            INNER JOIN pacientes p ON p.id = a.paciente_id
+            INNER JOIN medicos m ON m.id = a.medico_id
+            ORDER BY id DESC
+        ");
+        echo json_encode($stmt->fetchAll());
+        exit;
+    }
 
   if ($method === 'POST') {
-    $paciente     = trim($_POST['paciente'] ?? '');
-    $profissional = trim($_POST['profissional'] ?? '');
+    $paciente_id     = trim($_POST['paciente_id'] ?? '');
+    $medico_id = trim($_POST['medico_id'] ?? '');
     $tipo         = trim($_POST['tipo'] ?? 'Consulta');
     $status       = trim($_POST['status'] ?? 'Pendente');
-    $data_at      = trim($_POST['data_atendimento'] ?? '');
+    $data_atendimento      = trim($_POST['data_atendimento'] ?? '');
     $diagnostico  = trim($_POST['diagnostico'] ?? '');
     $cid          = trim($_POST['cid'] ?? '');
-    $prescricao   = trim($_POST['prescricao'] ?? '');
     $observacoes  = trim($_POST['observacoes'] ?? '');
 
-    if ($paciente==='' || $profissional==='' || $data_at==='') {
+    if ($paciente_id==='' || $medico_id==='' || $data_atendimento==='') {
       http_response_code(422);
       echo json_encode(['error'=>'Preencha paciente, profissional e data.']);
       exit;
@@ -51,13 +77,13 @@ try {
 
     $anexo = save_upload('anexo', __DIR__ . '/../uploads/atendimentos');
 
-    $sql = "INSERT INTO atendimentos (paciente, profissional, tipo, status, data_atendimento, diagnostico, cid, prescricao, observacoes, anexo)
-            VALUES (:paciente, :profissional, :tipo, :status, :data_atendimento, :diagnostico, :cid, :prescricao, :observacoes, :anexo)";
+    $sql = "INSERT INTO atendimentos (paciente_id, medico_id, tipo, status, data_atendimento, diagnostico, cid, observacoes, anexo)
+            VALUES (:paciente_id, :medico_id, :tipo, :status, :data_atendimento, :diagnostico, :cid, :observacoes, :anexo)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
-      ':paciente'=>$paciente, ':profissional'=>$profissional, ':tipo'=>$tipo, ':status'=>$status,
+      ':paciente_id'=>$paciente_id, ':medico_id'=>$medico_id, ':tipo'=>$tipo, ':status'=>$status,
       ':data_atendimento'=>$data_at, ':diagnostico'=>$diagnostico, ':cid'=>$cid,
-      ':prescricao'=>$prescricao, ':observacoes'=>$observacoes, ':anexo'=>$anexo
+      ':observacoes'=>$observacoes, ':anexo'=>$anexo
     ]);
     echo json_encode(['success'=>true, 'id'=>$pdo->lastInsertId(), 'anexo'=>$anexo]);
     exit;
@@ -68,34 +94,33 @@ try {
     $id   = (int)($data['id'] ?? 0);
     if ($id<=0) { http_response_code(422); echo json_encode(['error'=>'ID inválido']); exit; }
 
-    $paciente     = trim($data['paciente'] ?? '');
-    $profissional = trim($data['profissional'] ?? '');
+    $paciente_id     = trim($data['paciente_id'] ?? '');
+    $medico_id = trim($data['medico_id'] ?? '');
     $tipo         = trim($data['tipo'] ?? 'Consulta');
     $status       = trim($data['status'] ?? 'Pendente');
     $data_at      = trim($data['data_atendimento'] ?? '');
     $diagnostico  = trim($data['diagnostico'] ?? '');
     $cid          = trim($data['cid'] ?? '');
-    $prescricao   = trim($data['prescricao'] ?? '');
     $observacoes  = trim($data['observacoes'] ?? '');
     $remover_anexo= !empty($data['remover_anexo']);
 
-    if ($paciente==='' || $profissional==='' || $data_at==='') {
+    if ($paciente_id==='' || $medico_id==='' || $data_at==='') {
       http_response_code(422);
       echo json_encode(['error'=>'Preencha paciente, profissional e data.']);
       exit;
     }
 
     $sql = "UPDATE atendimentos
-            SET paciente=:paciente, profissional=:profissional, tipo=:tipo, status=:status,
+            SET paciente_id=:paciente_id, medico_id=:medico_id, tipo=:tipo, status=:status,
                 data_atendimento=:data_atendimento, diagnostico=:diagnostico, cid=:cid,
-                prescricao=:prescricao, observacoes=:observacoes"
+                observacoes=:observacoes"
             . ($remover_anexo ? ", anexo = NULL " : " ")
             . "WHERE id=:id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
-      ':paciente'=>$paciente, ':profissional'=>$profissional, ':tipo'=>$tipo, ':status'=>$status,
+      ':paciente_id'=>$paciente_id, ':medico_id'=>$medico_id, ':tipo'=>$tipo, ':status'=>$status,
       ':data_atendimento'=>$data_at, ':diagnostico'=>$diagnostico, ':cid'=>$cid,
-      ':prescricao'=>$prescricao, ':observacoes'=>$observacoes, ':id'=>$id
+      ':observacoes'=>$observacoes, ':id'=>$id
     ]);
     echo json_encode(['success'=>true]);
     exit;

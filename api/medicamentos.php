@@ -15,31 +15,41 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 try {
   if ($method === 'GET') {
-    $stmt = $pdo->query("SELECT id, nome, dosagem, forma, fabricante FROM medicamentos ORDER BY id DESC");
+    $stmt = $pdo->query("SELECT id, nome, principio_ativo, data_validade, fabricante, quantidade, cod_barras, lote, custo, unidade_medida FROM medicamentos ORDER BY id DESC");
     echo json_encode($stmt->fetchAll());
     exit;
   }
 
   if ($method === 'POST') {
     $nome = trim($_POST['nome'] ?? '');
-    $dos  = trim($_POST['dosagem'] ?? '');
-    $form = trim($_POST['forma'] ?? '');
+    $pri  = trim($_POST['principio_ativo'] ?? '');
+    $dtv = trim($_POST['data_validade'] ?? '');
     $fab  = trim($_POST['fabricante'] ?? '');
+    $qtd  = trim($_POST['quantidade'] ?? '');
+    $cob  = trim($_POST['cod_barras'] ?? '');
+    $lot  = trim($_POST['lote'] ?? '');
+    $cus  = trim($_POST['custo'] ?? '');
+    $unm  = trim($_POST['unidade_medida'] ?? '');
 
-    if ($nome === '' || $dos === '' || $form === '' || $fab === '') {
+    if ($nome === '' || $dtv === '' || $lot === '' || $unm === '') {
       http_response_code(422);
-      echo json_encode(['error' => 'Campos obrigatórios não informados.']);
+      echo json_encode(['error' => 'Campos obrigatórios não validados.']);
       exit;
     }
 
-    $sql = "INSERT INTO medicamentos (nome, dosagem, forma, fabricante)
-            VALUES (:nome, :dos, :forma, :fab)";
+    $sql = "INSERT INTO medicamentos (nome, principio_ativo, data_validade, fabricante, quantidade, cod_barras, lote, custo, unidade_medida)
+            VALUES (:nome, :pri, :dtv, :fab, :qtd, :cob, :lot, :cus, :unm)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
       ':nome' => $nome,
-      ':dos'  => $dos,
-      ':forma'=> $form,
-      ':fab'  => $fab
+      ':pri'  => $pri,
+      ':dtv'=> $dtv,
+      ':fab'  => $fab,
+      ':qtd'  => $qtd,
+      ':cob'  => $cob,
+      ':lot'  => $lot,
+      ':cus'  => $cus,
+      ':unm'  => $unm
     ]);
 
     echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
@@ -50,22 +60,35 @@ try {
     $data = json_input();
     $id   = (int)($data['id'] ?? 0);
     $nome = trim($data['nome'] ?? '');
-    $dos  = trim($data['dosagem'] ?? '');
-    $form = trim($data['forma'] ?? '');
+    $pri  = trim($data['principio_ativo'] ?? '');
+    $dtv = trim($data['data_validade'] ?? '');
     $fab  = trim($data['fabricante'] ?? '');
+    $qtd  = trim($data['quantidade'] ?? '');
+    $cob  = trim($data['cod_barras'] ?? '');
+    $lot  = trim($data['lote'] ?? '');
+    $cus  = trim($data['custo'] ?? '');
+    $unm  = trim($data['unidade_medida'] ?? '');
 
-    if ($id <= 0 || $nome === '' || $dos === '' || $form === '' || $fab === '') {
+    if ($id <= 0 || $nome === '' || $dtv === '' || $lot === '' || $unm === '') {
       http_response_code(422);
       echo json_encode(['error' => 'Dados inválidos.']);
       exit;
     }
 
     $sql = "UPDATE medicamentos
-            SET nome=:nome, dosagem=:dos, forma=:forma, fabricante=:fab
+            SET nome=:nome, principio_ativo=:pri, data_validade=:data_validade, fabricante=:fab, quantidade=:qtd, cod_barras=:cob, lote=:lot, custo=:cus, unidade_medida=:unm
             WHERE id=:id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
-      ':nome'=>$nome, ':dos'=>$dos, ':forma'=>$form, ':fab'=>$fab, ':id'=>$id
+      ':nome' => $nome,
+      ':pri'  => $pri,
+      ':data_validade'=> $dtv,
+      ':fab'  => $fab,
+      ':qtd'  => $qtd,
+      ':cob'  => $cob,
+      ':lot'  => $lot,
+      ':cus'  => $cus,
+      ':unm'  => $unm
     ]);
 
     echo json_encode(['success' => true]);

@@ -1,5 +1,5 @@
 CREATE TABLE pacientes (
-    id SERIAL PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
     cpf VARCHAR(14) UNIQUE NOT NULL,
     data_nascimento DATE NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE pacientes (
 
 
 CREATE TABLE medicos (
-    id SERIAL PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
     crm VARCHAR(20) UNIQUE NOT NULL,
     especialidade VARCHAR(50) NOT NULL,
@@ -18,31 +18,55 @@ CREATE TABLE medicos (
 
 
 CREATE TABLE medicamentos (
-    id SERIAL PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
     principio_ativo VARCHAR(100),
     fabricante VARCHAR(50),
-    data_validade DATE,
-    quantidade INT DEFAULT 0
+    data_validade DATE NOT NULL,
+    quantidade INT DEFAULT 0,
+    cod_barras varchar(13),
+    lote varchar(50) NOT NULL,
+    custo decimal(10,2),
+    unidade_medida char(3) NOT NULL
 );
 
 
-CREATE TABLE consultas (
-    id SERIAL PRIMARY KEY,
+CREATE TABLE atendimentos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
     paciente_id INT NOT NULL REFERENCES pacientes(id) ON DELETE CASCADE,
     medico_id INT NOT NULL REFERENCES medicos(id) ON DELETE CASCADE,
-    data_consulta TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    data_atendimento TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     diagnostico TEXT,
-    prescricao TEXT
+    tipo TEXT,
+    cid TEXT,
+    status TEXT,
+    observacoes TEXT,
+    anexo TEXT
+);
+
+CREATE TABLE prescricoes (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    atendimento_id int not null,
+    dosagem varchar(20) not NULL,
+    frequencia varchar(20) not null,
+    duracao varchar(20) not null,
+    criado_em date not null DEFAULT CURRENT_TIMESTAMP
 );
 
 Para login
 CREATE TABLE usuarios (
-    id SERIAL PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(100) UNIQUE NOT NULL,
     senha VARCHAR(255) NOT NULL, -- Deve ser armazenada como hash por segurança
     nome VARCHAR(100),
     perfil ENUM('ADMIN', 'USER') DEFAULT 'USER'
 );
 
+ALTER TABLE `atendimentos`
+	ADD CONSTRAINT `FK_atendimentos_pacientes` FOREIGN KEY (`paciente_id`) REFERENCES `pacientes` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
+ALTER TABLE `atendimentos`
+	ADD CONSTRAINT `FK_atendimentos_medicos` FOREIGN KEY (`medico_id`) REFERENCES `medicos` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+ALTER TABLE `prescricoes`
+	ADD CONSTRAINT `FK_prescricoes_atendimentos` FOREIGN KEY (`atendimento_id`) REFERENCES `atendimentos` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION;
