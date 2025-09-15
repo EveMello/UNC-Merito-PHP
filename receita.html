@@ -9,8 +9,9 @@
   <style>
     .actions{display:flex;gap:.5rem}
     .card-body{padding:2rem}
-    .rx-item-row{gap:.5rem}
+    .rx-item-row{gap:.5rem;margin-bottom:1rem;padding:1rem;border:1px solid #dee2e6;border-radius:8px;background:#f8f9fa}
     .rx-item-row .form-control,.rx-item-row .form-select{min-width:120px}
+    .medicamento-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
     /* Área de impressão A5/A4 */
     .print-wrap{background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:24px;max-width:900px;margin:auto}
     .rx-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px}
@@ -23,7 +24,6 @@
       body{background:#fff}
       .no-print{display:none!important}
       #printArea{page-break-inside:avoid}
-      
     }
   </style>
 </head>
@@ -72,20 +72,23 @@
                   <form id="rxForm">
                     <div class="mb-3">
                       <label class="form-label">Paciente</label>
-                      <select id="paciente_id" class="form-select" required></select>
+                      <input type="text" id="paciente_nome" class="form-control" readonly>
                     </div>
+
                     <div class="mb-3">
                       <label class="form-label">Médico</label>
-                      <select id="medico_id" class="form-select" required></select>
+                      <input type="text" id="medico_nome" class="form-control" readonly>
                     </div>
                     <div class="mb-3">
                       <label class="form-label">Data de Emissão</label>
                       <input type="date" id="data_emissao" class="form-control" required>
                     </div>
 
-                    <div class="mb-2 d-flex justify-content-between align-items-center">
-                      <label class="form-label m-0">Itens da Receita</label>
-                      <button type="button" class="btn btn-sm btn-outline-primary" id="addItem"><i class="fas fa-plus"></i> Item</button>
+                    <div class="medicamento-header">
+                      <label class="form-label m-0"><strong>Medicamentos da Receita</strong></label>
+                      <button type="button" class="btn btn-sm btn-outline-primary" id="addMedicamento">
+                        <i class="fas fa-plus"></i> Adicionar Medicamento
+                      </button>
                     </div>
                     <div id="itensWrap"></div>
 
@@ -162,193 +165,289 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Endpoint da API em PHP (já criada anteriormente)
+    // Endpoint da API em PHP
     const API = 'api/receitas.php';
 
     const alertArea = document.getElementById('alertArea');
     const itensWrap = document.getElementById('itensWrap');
+    let medicamentosData = [];
 
-    function showAlert(msg,type='success'){
+    function showAlert(msg, type = 'success') {
       alertArea.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
     }
 
-    //Buscar id do Agendamento selecionado
+    // Buscar id do Agendamento selecionado
     async function loadAtendimentoData() {
       const params = new URLSearchParams(window.location.search);
       const atendimentoId = params.get('atendimento_id');
-      if(!atendimentoId) return;
+      
+      if (!atendimentoId) {
+        console.log('Nenhum ID de atendimento encontrado na URL');
+        return;
+      }
 
       try {
         const res = await fetch(`api/atendimentos.php?id=${atendimentoId}`);
         const data = await res.json();
-        if(!data) return;
+        
+        if (!data) {
+          console.log('Nenhum dado retornado');
+          return;
+        }
 
-        // Selecionar paciente
-        const pacSel = document.getElementById('paciente_id');
-        pacSel.value = data.paciente_id;
+        // Preencher os campos de exibição
+        document.getElementById('paciente_nome').value = data.paciente || '';
+        document.getElementById('medico_nome').value = data.profissional || '';
 
-        // Selecionar médico
-        const medSel = document.getElementById('medico_id');
-        medSel.value = data.medico_id;
-
-      } catch(e){
+      } catch (e) {
         console.error('Erro ao carregar dados do atendimento:', e);
       }
     }
 
-    // monta uma linha de item
-    function makeItemRow(medOptions){
+    // Monta uma linha de medicamento
+    function makeMedicamentoRow() {
       const row = document.createElement('div');
-      row.className = 'row rx-item-row align-items-end mb-2';
+      row.className = 'row rx-item-row align-items-end';
       row.innerHTML = `
-        <div class="col-12 col-md-4">
-          <label class="form-label">Medicamento</label>
-          <select class="form-select rx_med">${medOptions}</select>
+        <div class="col-12">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="m-0">Medicamento</h6>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.rx-item-row').remove()">
+              <i class="fas fa-trash"></i> Remover
+            </button>
+          </div>
         </div>
-        <div class="col-6 col-md-2">
-          <label class="form-label">Dosagem</label>
-          <input type="text" class="form-control rx_dos" placeholder="ex: 500mg">
+        <div class="col-12 col-md-6">
+          <label class="form-label">Medicamento *</label>
+          <select class="form-select rx_med" required>
+            <option value="">Selecione um medicamento...</option>
+            ${medicamentosData.map(md => {
+              const base = (md.dosagem ? ` ${md.dosagem}` : '') + (md.forma ? ` - ${md.forma}` : '');
+              return `<option value="${md.id}" data-dos="${md.dosagem || ''}">${md.nome}${base}</option>`;
+            }).join('')}
+          </select>
         </div>
-        <div class="col-12 col-md-4">
-          <label class="form-label">Posologia</label>
-          <input type="text" class="form-control rx_pos" placeholder="ex: 1 comp 8/8h por 5 dias">
+        <div class="col-12 col-md-6">
+          <label class="form-label">Dosagem *</label>
+          <input type="text" class="form-control rx_dos" placeholder="ex: 500mg" required>
         </div>
-        <div class="col-6 col-md-1">
-          <label class="form-label">Qtd</label>
-          <input type="text" class="form-control rx_qt" placeholder="ex: 20">
+        <div class="col-12 col-md-6 mt-2">
+          <label class="form-label">Frequência *</label>
+          <input type="text" class="form-control rx_freq" placeholder="ex: 8/8h, 12/12h" required>
         </div>
-        <div class="col-6 col-md-1">
+        <div class="col-12 col-md-6 mt-2">
           <label class="form-label">Duração</label>
-          <input type="text" class="form-control rx_dur" placeholder="ex: 5d">
+          <input type="text" class="form-control rx_dur" placeholder="ex: 5 dias">
         </div>
-        <div class="col-12 col-md-12 mt-1">
-          <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.rx-item-row').remove()"><i class="fas fa-trash"></i></button>
-        </div>`;
+      `;
       return row;
     }
 
-    // carregar listas (pacientes, médicos, medicamentos) da API
-    async function bootstrapData(){
-      const res = await fetch(API + '?bootstrap=1', { cache: 'no-store' });
-      const data = await res.json();
-
-      // paciente
-      const pacSel = document.getElementById('paciente_id');
-      pacSel.innerHTML = data.pacientes.map(p => `<option value="${p.id}" data-cpf="${p.cpf||''}">${p.nome}</option>`).join('');
-
-      // medico
-      const medSel = document.getElementById('medico_id');
-      medSel.innerHTML = data.medicos.map(m => `<option value="${m.id}" data-crm="${m.crm||''}" data-nome="${m.nome}">${m.nome} (${m.crm||''})</option>`).join('');
-
-      // medicamentos
-      const medOpts = data.medicamentos.map(md => {
-        const base = (md.dosagem ? ` ${md.dosagem}`:'') + (md.forma? ` - ${md.forma}`:'');
-        return `<option value="${md.id}" data-dos="${md.dosagem||''}">${md.nome}${base}</option>`;
-      }).join('');
-
-      // item inicial
-      itensWrap.appendChild(makeItemRow(medOpts));
-
-      // auto preencher dosagem quando trocar medicamento
-      itensWrap.addEventListener('change', (e)=>{
-        if(e.target.classList.contains('rx_med')){
-          const dos = e.target.selectedOptions[0].dataset.dos || '';
-          e.target.closest('.rx-item-row').querySelector('.rx_dos').value = dos;
+    // Carregar medicamentos da API
+    async function loadMedicamentos() {
+      try {
+        const res = await fetch('api/receitas.php?bootstrap=1');
+        if (!res.ok) {
+          throw new Error(`Erro HTTP: ${res.status}`);
         }
-      });
+        const data = await res.json();
+        
+        console.log('Dados recebidos:', data); // Para debug
+        
+        if (data && data.medicamentos) {
+          medicamentosData = data.medicamentos;
+          console.log('Medicamentos carregados:', medicamentosData); // Para debug
+          
+          // Adicionar evento de change para auto-preencher dosagem
+          itensWrap.addEventListener('change', (e) => {
+            if (e.target.classList.contains('rx_med')) {
+              const selectedOption = e.target.selectedOptions[0];
+              if (selectedOption && selectedOption.value) {
+                const dos = selectedOption.dataset.dos || '';
+                e.target.closest('.rx-item-row').querySelector('.rx_dos').value = dos;
+              }
+            }
+          });
 
-      // + item
-      document.getElementById('addItem').addEventListener('click', ()=> itensWrap.appendChild(makeItemRow(medOpts)));
+          // Adicionar primeiro medicamento
+          addMedicamento();
+        } else {
+          console.error('Estrutura de dados inesperada:', data);
+          showAlert('Erro ao carregar medicamentos: estrutura de dados inválida', 'danger');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar medicamentos:', error);
+        showAlert('Erro ao carregar lista de medicamentos: ' + error.message, 'danger');
+        
+        // Adicionar opção de fallback para debug
+        medicamentosData = [{id: 1, nome: 'Medicamento Teste', dosagem: '500mg', forma: 'Comprimido'}];
+        addMedicamento();
+      }
 
-      // data = hoje
-      document.getElementById('data_emissao').value = new Date().toISOString().slice(0,10);
+      // Carregar medicamentos da API
+      async function loadMedicamentos() {
+        try {
+          console.log('Carregando medicamentos...');
+          const res = await fetch('api/receitas.php?bootstrap=1');
+          
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error('Resposta do servidor:', errorText);
+            throw new Error(`Erro HTTP: ${res.status} - ${errorText}`);
+          }
+          
+          const data = await res.json();
+          console.log('Dados recebidos:', data);
+          
+          if (data && data.medicamentos) {
+            medicamentosData = data.medicamentos;
+            console.log('Medicamentos carregados:', medicamentosData);
+            
+            // Resto do código...
+          } else {
+            console.error('Estrutura de dados inesperada:', data);
+            showAlert('Erro: estrutura de dados inválida da API', 'danger');
+          }
+        } catch (error) {
+          console.error('Erro completo:', error);
+          showAlert('Erro ao carregar medicamentos: ' + error.message, 'danger');
+          addMedicamento();
+        }
+      }
     }
 
-    // pré-visualização
-    function fillPreview(receitaId=null){
-      const pacSel = document.getElementById('paciente_id');
-      const pacNome = pacSel.selectedOptions[0]?.textContent || '';
-      const pacCpf  = pacSel.selectedOptions[0]?.dataset.cpf || '';
+    // Adicionar novo medicamento
+    function addMedicamento() {
+      itensWrap.appendChild(makeMedicamentoRow());
+    }
 
-      const medSel = document.getElementById('medico_id');
-      const medNome= medSel.selectedOptions[0]?.dataset.nome || medSel.selectedOptions[0]?.textContent || '';
-      const crm    = medSel.selectedOptions[0]?.dataset.crm || '';
+    // Configurar data atual
+    function setCurrentDate() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      document.getElementById('data_emissao').value = `${year}-${month}-${day}`;
+    }
 
+    // Pré-visualização
+    function fillPreview(receitaId = null) {
       document.getElementById('rxNumero').textContent = receitaId ? receitaId : '—';
-      document.getElementById('rxData').textContent   = document.getElementById('data_emissao').value || '—';
-      document.getElementById('rxPaciente').textContent = pacNome || '—';
-      document.getElementById('rxCpf').textContent    = pacCpf || '—';
-      document.getElementById('rxMedico').textContent = medNome || '—';
-      document.getElementById('rxCrm').textContent    = crm || '—';
-      document.getElementById('rxObs').textContent    = document.getElementById('observacoes').value || '—';
+      document.getElementById('rxData').textContent = document.getElementById('data_emissao').value || '—';
+      document.getElementById('rxPaciente').textContent = document.getElementById('paciente_nome').value || '—';
+      document.getElementById('rxMedico').textContent = document.getElementById('medico_nome').value || '—';
+      document.getElementById('rxObs').textContent = document.getElementById('observacoes').value || '—';
 
       const list = document.getElementById('rxItens');
       list.innerHTML = '';
       const rows = document.querySelectorAll('.rx-item-row');
-      rows.forEach((r)=>{
+      
+      rows.forEach((r) => {
         const medTxt = r.querySelector('.rx_med').selectedOptions[0]?.textContent || '';
-        const dos    = r.querySelector('.rx_dos').value.trim();
-        const pos    = r.querySelector('.rx_pos').value.trim();
-        const qt     = r.querySelector('.rx_qt').value.trim();
-        const dur    = r.querySelector('.rx_dur').value.trim();
+        const dos = r.querySelector('.rx_dos').value.trim();
+        const freq = r.querySelector('.rx_freq').value.trim();
+        const dur = r.querySelector('.rx_dur').value.trim();
+        
         const li = document.createElement('li');
-        li.innerHTML = `<strong>${medTxt}</strong>${dos? ' — '+dos:''}<br><em>Posologia:</em> ${pos || '-'}${qt? ' | Qtd: '+qt:''}${dur? ' | Duração: '+dur:''}`;
+        li.innerHTML = `
+          <strong>${medTxt}</strong>${dos ? ' — ' + dos : ''}<br>
+          <em>Frequência:</em> ${freq || '-'}${dur ? ' | Duração: ' + dur : ''}
+        `;
         list.appendChild(li);
       });
     }
 
-    document.getElementById('btnPreview').addEventListener('click', ()=> fillPreview());
+    // Validar formulário antes de salvar
+    function validateForm() {
+      const medicamentoRows = document.querySelectorAll('.rx-item-row');
+      if (medicamentoRows.length === 0) {
+        showAlert('Adicione pelo menos um medicamento à receita', 'warning');
+        return false;
+      }
 
-    document.getElementById('btnLimparPreview').addEventListener('click', ()=>{
-      document.getElementById('rxNumero').textContent = '—';
-      document.getElementById('rxItens').innerHTML = '';
-      document.getElementById('rxObs').textContent = '—';
-    });
+      let isValid = true;
+      medicamentoRows.forEach(row => {
+        const medicamento = row.querySelector('.rx_med');
+        const dosagem = row.querySelector('.rx_dos');
+        const frequencia = row.querySelector('.rx_freq');
+        
+        if (!medicamento.value || !dosagem.value || !frequencia.value) {
+          isValid = false;
+          if (!medicamento.value) medicamento.classList.add('is-invalid');
+          if (!dosagem.value) dosagem.classList.add('is-invalid');
+          if (!frequencia.value) frequencia.classList.add('is-invalid');
+        }
+      });
 
-    // salvar & imprimir
-    document.getElementById('rxForm').addEventListener('submit', async (e)=>{
+      return isValid;
+    }
+
+    // Salvar receita
+    async function saveReceita(e) {
       e.preventDefault();
+      
+      if (!validateForm()) {
+        showAlert('Preencha todos os campos obrigatórios dos medicamentos', 'danger');
+        return;
+      }
 
-      // montar payload
       const itens = [];
-      document.querySelectorAll('.rx-item-row').forEach(r=>{
+      document.querySelectorAll('.rx-item-row').forEach(r => {
         itens.push({
-          medicamento_id: parseInt(r.querySelector('.rx_med').value,10),
-          dosagem:   r.querySelector('.rx_dos').value.trim(),
-          posologia: r.querySelector('.rx_pos').value.trim(),
-          quantidade:r.querySelector('.rx_qt').value.trim(),
-          duracao:   r.querySelector('.rx_dur').value.trim()
+          medicamento_id: parseInt(r.querySelector('.rx_med').value, 10),
+          dosagem: r.querySelector('.rx_dos').value.trim(),
+          posologia: r.querySelector('.rx_freq').value.trim(), // Note: mantendo 'posologia' no backend mas usando 'frequencia' no front
+          duracao: r.querySelector('.rx_dur').value.trim()
         });
       });
 
       const payload = {
-        paciente_id: parseInt(document.getElementById('paciente_id').value,10),
-        medico_id:   parseInt(document.getElementById('medico_id').value,10),
-        data_emissao:document.getElementById('data_emissao').value,
+        paciente_id: 1, // Você precisará ajustar isso conforme sua lógica
+        medico_id: 1,   // Você precisará ajustar isso conforme sua lógica
+        data_emissao: document.getElementById('data_emissao').value,
         observacoes: document.getElementById('observacoes').value.trim(),
         itens
       };
 
-      try{
+      console.log('Payload enviado:', payload); // Para debug
+
+      try {
         const res = await fetch(API, {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
+        
         const data = await res.json();
-        if(!res.ok) throw new Error(data.error || 'Falha ao salvar receita.');
-        showAlert('Receita salva com sucesso! Número: '+data.receita_id);
+        if (!res.ok) throw new Error(data.error || 'Falha ao salvar receita.');
+        
+        showAlert('Receita salva com sucesso! Número: ' + data.receita_id);
         fillPreview(data.receita_id);
-        // imprime
-        setTimeout(()=> window.print(), 300);
-      }catch(err){
-        showAlert(err.message, 'danger');
+        setTimeout(() => window.print(), 300);
+      } catch (err) {
+        console.error('Erro ao salvar receita:', err);
+        showAlert('Erro ao salvar receita: ' + err.message, 'danger');
       }
-    });
+    }
 
     // Inicialização
-    await bootstrapData();
-    loadAtendimentoData();
+    document.addEventListener('DOMContentLoaded', async function() {
+      // Configurar eventos
+      document.getElementById('addMedicamento').addEventListener('click', addMedicamento);
+      document.getElementById('btnPreview').addEventListener('click', () => fillPreview());
+      document.getElementById('btnLimparPreview').addEventListener('click', () => {
+        document.getElementById('rxNumero').textContent = '—';
+        document.getElementById('rxItens').innerHTML = '';
+        document.getElementById('rxObs').textContent = '—';
+      });
+
+      document.getElementById('rxForm').addEventListener('submit', saveReceita);
+
+      // Carregar dados
+      await loadMedicamentos();
+      await loadAtendimentoData();
+      setCurrentDate();
+    });
   </script>
 </body>
 </html>

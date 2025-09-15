@@ -27,22 +27,29 @@ function save_upload($field, $destDir) {
 
 try {
   if ($method === 'GET' && isset($_GET['id'])) {
-        $id = (int)$_GET['id'];
-        $stmt = $pdo->prepare("
-            SELECT a.id, a.paciente_id, p.nome AS paciente,
-                   a.medico_id, m.nome AS profissional,
-                   a.tipo, a.status, DATE_FORMAT(a.data_atendimento,'%Y-%m-%d') AS data_atendimento,
-                   a.diagnostico, a.cid, a.observacoes, a.anexo
-            FROM atendimentos a
-            INNER JOIN pacientes p ON p.id = a.paciente_id
-            INNER JOIN medicos m ON m.id = a.medico_id
-            WHERE a.id = :id
-        ");
-        $stmt->execute([':id' => $id]);
-        $atendimento = $stmt->fetch(PDO::FETCH_ASSOC);
-        echo json_encode($atendimento, JSON_UNESCAPED_UNICODE);
+    $id = (int)$_GET['id'];
+    $stmt = $pdo->prepare("
+        SELECT a.id, a.paciente_id, p.nome AS paciente,
+               a.medico_id, m.nome AS profissional,
+               a.tipo, a.status, DATE_FORMAT(a.data_atendimento,'%Y-%m-%d') AS data_atendimento,
+               a.diagnostico, a.cid, a.observacoes, a.anexo
+        FROM atendimentos a
+        INNER JOIN pacientes p ON p.id = a.paciente_id
+        INNER JOIN medicos m ON m.id = a.medico_id
+        WHERE a.id = :id
+    ");
+    $stmt->execute([':id' => $id]);
+    $atendimento = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$atendimento) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Atendimento não encontrado']);
         exit;
     }
+    
+    echo json_encode($atendimento, JSON_UNESCAPED_UNICODE);
+    exit;
+  }
 
     // GET todos os atendimentos (para listagem)
     if ($method === 'GET') {

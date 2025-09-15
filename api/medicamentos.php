@@ -5,6 +5,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 require_once __DIR__ . '/../config/db.php';
 
+
+
 function json_input() {
   $raw = file_get_contents('php://input');
   $data = json_decode($raw, true);
@@ -21,6 +23,7 @@ try {
   }
 
   if ($method === 'POST') {
+    $input = json_input();
     $nome = trim($_POST['nome'] ?? '');
     $pri  = trim($_POST['principio_ativo'] ?? '');
     $dtv = trim($_POST['data_validade'] ?? '');
@@ -76,13 +79,14 @@ try {
     }
 
     $sql = "UPDATE medicamentos
-            SET nome=:nome, principio_ativo=:pri, data_validade=:data_validade, fabricante=:fab, quantidade=:qtd, cod_barras=:cob, lote=:lot, custo=:cus, unidade_medida=:unm
+            SET nome=:nome, principio_ativo=:pri, data_validade=:dtv, fabricante=:fab, quantidade=:qtd, cod_barras=:cob, lote=:lot, custo=:cus, unidade_medida=:unm
             WHERE id=:id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
+      'id' => $id,
       ':nome' => $nome,
       ':pri'  => $pri,
-      ':data_validade'=> $dtv,
+      ':dtv'=> $dtv,
       ':fab'  => $fab,
       ':qtd'  => $qtd,
       ':cob'  => $cob,

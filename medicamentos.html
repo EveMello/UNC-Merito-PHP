@@ -73,7 +73,7 @@
                 Medicamentos
               </a>
                <a class="nav-link" href="atendimentos.html"><div class="sb-nav-link-icon"><i class="fas fa-notes-medical"></i></div>Atendimentos</a>
-            <a class="nav-link" href="receita.html"><div class="sb-nav-link-icon"><i class="fas fa-file-signature"></i></div>Receitas</a>
+            <!-- <a class="nav-link" href="receita.html"><div class="sb-nav-link-icon"><i class="fas fa-file-signature"></i></div>Receitas</a> -->
             </div>
           </div>
           <div class="sb-sidenav-footer">
@@ -109,6 +109,8 @@
                       <th>Quantidade</th>
                       <th>Código de Barras</th>
                       <th>Lote</th>
+                      <th>Custo</th>
+                      <th>Unidade de Medida</th>
                       <th>Ações</th>
                     </tr>
                   </thead>
@@ -255,6 +257,8 @@
               <td>${m.quantidade}</td>
               <td>${m.cod_barras}</td>
               <td>${m.lote}</td>
+              <td>${m.custo}</td>
+              <td>${m.unidade_medida}</td>
               <td class="actions justify-content-center">
                 <button class="btn btn-sm btn-info" data-action="detalhes">Detalhes</button>
                 <button class="btn btn-sm btn-warning" data-action="editar">Editar</button>
@@ -279,7 +283,7 @@
         if(!nome || !dtv || !lot ||!unm){showAlert('Preencha os campos obrigatórios.','warning');return;}
         try{
           if(id){
-            const res=await fetch(API,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,nome,principio_ativo:pri,forma,fabricante:fab, quantidade:qtd, cod_barras:cob, lote:lot, custo:cus, unidade_medida:unm})});
+            const res=await fetch(API,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id,nome:nome,principio_ativo:pri,data_validade:dtv,fabricante:fab, quantidade:qtd, cod_barras:cob, lote:lot, custo:cus, unidade_medida:unm})});
             const data=await res.json();
             if(!res.ok) throw new Error(data.error||'Falha ao atualizar');
             showAlert('Medicamento atualizado com sucesso!');
@@ -309,19 +313,19 @@
           detailsContent.innerHTML=Array.from(tds).slice(0,4).map((td,i)=>`<p><strong>${labels[i]}:</strong> ${td.textContent}</p>`).join('');
           new bootstrap.Modal(document.getElementById('detailsModal')).show();
         }
-        if(btn.dataset.action==='editar'){
-          const tds=tr.querySelectorAll('td');
-          document.getElementById('newMedicationModalLabel').innerText='Editar Medicamento';
-          document.getElementById('medicationId').value=id;
-          document.getElementById('medicationName').value=tds[0].textContent;
-          document.getElementById('principio_ativo').value=tds[1].textContent;
-          document.getElementById('data_validade').value=tds[2].textContent;
-          document.getElementById('medicationManufacturer').value=tds[3].textContent;
-          document.getElementById('quantidade').value=tds[4].textContent;
-          document.getElementById('cob_barras').value=tds[5].textContent;
-          document.getElementById('lote').value=tds[6].textContent;
-          document.getElementById('custo').value=tds[7].textContent;
-          document.getElementById('unidade_medida').value=tds[8].textContent;
+        if (btn.dataset.action === 'editar') {
+          const tds = tr.querySelectorAll('td');
+          document.getElementById('newMedicationModalLabel').innerText = 'Editar Medicamento';
+          document.getElementById('medicationId').value = id;
+          document.getElementById('medicationName').value = tds[0].textContent.trim();
+          document.getElementById('principio_ativo').value = tds[1].textContent.trim();
+          document.getElementById('data_validade').value = tds[2].textContent.trim();
+          document.getElementById('medicationManufacturer').value = tds[3].textContent.trim();
+          document.getElementById('quantidade').value = tds[4].textContent.trim();
+          document.getElementById('cod_barras').value = tds[5].textContent.trim();
+          document.getElementById('lote').value = tds[6].textContent.trim();
+          document.getElementById('custo').value = tds[7].textContent.trim();
+          document.getElementById('unidade_medida').value = tds[8].textContent.trim();
           new bootstrap.Modal(modalEl).show();
         }
         if(btn.dataset.action==='excluir'){
