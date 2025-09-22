@@ -100,9 +100,11 @@
               <div class="col-xl-3 col-md-6">
                 <div class="card bg-success text-white mb-4">
                   <div class="card-body">
-                    <div>Consultas Agendadas</div>
+                    <div>Consultas Realizadas</div>
                     <div class="kpi-number" id="kpiConsultas">--</div>
-                    <div class="kpi-sub">Hoje</div>
+                    <div class="kpi-sub">
+                      Hoje: <span id="kpiFinalizadasHoje">--</span>
+                    </div>
                   </div>
                   <div class="card-footer d-flex align-items-center justify-content-between">
                     <a class="small text-white stretched-link" href="appointments.html">Ver Detalhes</a>
@@ -114,12 +116,12 @@
               <div class="col-xl-3 col-md-6">
                 <div class="card bg-warning text-white mb-4">
                   <div class="card-body">
-                    <div>Exames Pendentes</div>
-                    <div class="kpi-number" id="kpiExames">--</div>
+                    <div>Consultas Pendentes</div>
+                    <div class="kpi-number" id="kpiPendentes">--</div>
                     <div class="kpi-sub">Na fila</div>
                   </div>
                   <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="exams.html">Ver Detalhes</a>
+                    <a class="small text-white stretched-link" href="atendimentos.html">Ver Detalhes</a>
                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                   </div>
                 </div>
@@ -169,8 +171,9 @@
           const $ = (id) => document.getElementById(id);
           if ($('kpiPacientesAtivos'))   $('kpiPacientesAtivos').textContent   = data.pacientes_ativos ?? 0;
           if ($('kpiPacientesTotal'))    $('kpiPacientesTotal').textContent    = data.pacientes_total ?? 0;
-          if ($('kpiConsultas'))         $('kpiConsultas').textContent         = data.consultas_agendadas ?? 0;
-          if ($('kpiExames'))            $('kpiExames').textContent            = data.exames_pendentes ?? 0;
+          if ($('kpiConsultas'))         $('kpiConsultas').textContent         = data.consultas_finalizadas ?? 0;
+          if ($('kpiFinalizadasHoje'))         $('kpiFinalizadasHoje').textContent         = data.consultas_finalizadas_hoje ?? 0;
+          if ($('kpiPendentes'))            $('kpiPendentes').textContent            = data.consultas_agendadas ?? 0;
           if ($('kpiReceitas'))          $('kpiReceitas').textContent          = data.receitas_emitidas ?? 0;
           if ($('kpiMedicamentosTotal')) $('kpiMedicamentosTotal').textContent = data.medicamentos_total ?? 0;
         } catch (e) {

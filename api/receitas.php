@@ -9,7 +9,6 @@ require_once __DIR__ . '/../config/db.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Handle preflight requests
 if ($method === 'OPTIONS') {
     http_response_code(200);
     exit;
@@ -22,23 +21,20 @@ function json_input() {
 }
 
 try {
-    // Bootstrap de dados para montar selects
+    // Bootstrap de dados (pacientes, médicos, medicamentos)
     if ($method === 'GET' && isset($_GET['bootstrap'])) {
-        // Carregar pacientes
         $stmtPac = $pdo->prepare("SELECT id, nome, cpf FROM pacientes ORDER BY nome");
         $stmtPac->execute();
         $pac = $stmtPac->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Carregar médicos
+
         $stmtMed = $pdo->prepare("SELECT id, nome, crm, especialidade FROM medicos ORDER BY nome");
         $stmtMed->execute();
         $med = $stmtMed->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Carregar medicamentos
-        $stmtMeds = $pdo->prepare("SELECT id, nome, dosagem, forma, fabricante FROM medicamentos ORDER BY nome");
+
+        $stmtMeds = $pdo->prepare("SELECT id, nome, principio_ativo, fabricante, data_validade, quantidade, cod_barras FROM medicamentos ORDER BY nome");
         $stmtMeds->execute();
         $meds = $stmtMeds->fetchAll(PDO::FETCH_ASSOC);
-        
+
         echo json_encode([
             'pacientes' => $pac, 
             'medicos' => $med, 
@@ -47,7 +43,7 @@ try {
         exit;
     }
 
-    // Obter uma receita completa (para reabrir/ imprimir)
+    // Obter receita completa
     if ($method === 'GET' && isset($_GET['id'])) {
         $id = (int)$_GET['id'];
         if ($id <= 0) { 
@@ -57,35 +53,35 @@ try {
         }
 
         $cab = $pdo->prepare("
-            SELECT r.id, r.data_emissao, r.observacoes,
-                   p.nome AS paciente_nome, p.cpf AS paciente_cpf,
-                   m.nome AS medico_nome, m.crm AS medico_crm, m.especialidade AS medico_esp
-            FROM receitas r
-            JOIN pacientes p ON p.id = r.paciente_id
-            JOIN medicos m ON m.id = r.medico_id
+            SELECT p.id AS paciente_id, p.nome AS paciente_nome, p.cpf AS paciente_cpf,
+                   a.id AS atendimento_id,
+                   r.id AS receita_id, r.criado_em AS data_emissao
+            FROM prescricoes r
+            JOIN atendimentos a ON a.id = r.atendimento_id
+            JOIN pacientes p ON p.id = a.paciente_id
             WHERE r.id = :id
         ");
         $cab->execute([':id' => $id]);
         $header = $cab->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$header) { 
-            http_response_code(404); 
-            echo json_encode(['error' => 'Receita não encontrada']); 
-            exit; 
+
+        if (!$header) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Receita não encontrada']);
+            exit;
         }
 
         $it = $pdo->prepare("
-            SELECT ri.id, med.nome AS medicamento_nome, ri.dosagem, ri.posologia, ri.quantidade, ri.duracao
-            FROM receita_itens ri
-            JOIN medicamentos med ON med.id = ri.medicamento_id
-            WHERE ri.receita_id = :id
-            ORDER BY ri.id
+            SELECT mp.id, m.nome AS medicamento_nome, mp.dosagem, mp.frequencia, mp.duracao
+            FROM medicamentos_prescricao mp
+            JOIN medicamentos m ON m.id = mp.medicamento_id
+            WHERE mp.prescricao_id = :id
+            ORDER BY mp.id
         ");
         $it->execute([':id' => $id]);
         $itens = $it->fetchAll(PDO::FETCH_ASSOC);
 
         echo json_encode([
-            'cabecalho' => $header, 
+            'cabecalho' => $header,
             'itens' => $itens
         ], JSON_UNESCAPED_UNICODE);
         exit;
@@ -94,71 +90,61 @@ try {
     // Criar receita
     if ($method === 'POST') {
         $data = json_input();
-        
-        // Log para debug
-        error_log('Dados recebidos: ' . print_r($data, true));
-        
+        $atendimento_id = (int)($data['atendimento_id'] ?? 0);
         $paciente_id = (int)($data['paciente_id'] ?? 0);
         $medico_id = (int)($data['medico_id'] ?? 0);
         $data_emissao = trim($data['data_emissao'] ?? date('Y-m-d'));
         $observacoes = trim($data['observacoes'] ?? '');
         $itens = $data['itens'] ?? [];
 
-        if ($paciente_id <= 0 || $medico_id <= 0 || empty($itens)) {
+        if ($atendimento_id <= 0 || $paciente_id <= 0 || $medico_id <= 0 || empty($itens)) {
             http_response_code(422);
-            echo json_encode(['error' => 'Informe paciente, médico e ao menos 1 item.']);
+            echo json_encode(['error' => 'Informe atendimento, paciente, médico e ao menos 1 item.']);
             exit;
         }
 
         $pdo->beginTransaction();
-        
         try {
-            // Inserir receita
+            // Inserir prescrição
             $stmt = $pdo->prepare("
-                INSERT INTO receitas (atendimento_id, dosagem, frequencia, duracao, data_emissao, observacoes) 
-                VALUES (:p, :m, :d, :o)
+                INSERT INTO prescricoes (atendimento_id, criado_em) 
+                VALUES (:atendimento, :data_emissao)
             ");
             $stmt->execute([
-                ':p' => $paciente_id, 
-                ':m' => $medico_id, 
-                ':d' => $data_emissao, 
-                ':o' => $observacoes
+                ':atendimento' => $atendimento_id,
+                ':data_emissao' => $data_emissao
             ]);
             $rid = (int)$pdo->lastInsertId();
 
-            // Inserir itens da receita
+            // Inserir medicamentos
             $ins = $pdo->prepare("
-                INSERT INTO receita_itens (receita_id, medicamento_id, dosagem, posologia, quantidade, duracao)
-                VALUES (:r, :med, :dos, :pos, :qt, :dur)
+                INSERT INTO medicamentos_prescricao 
+                (prescricao_id, medicamento_id, dosagem, frequencia, duracao)
+                VALUES (:prescricao, :medicamento, :dosagem, :frequencia, :duracao)
             ");
 
             foreach ($itens as $item) {
                 $medicamento_id = (int)($item['medicamento_id'] ?? 0);
                 $dosagem = trim($item['dosagem'] ?? '');
-                $posologia = trim($item['posologia'] ?? '');
-                $quantidade = trim($item['quantidade'] ?? '');
+                $frequencia = trim($item['posologia'] ?? '');
                 $duracao = trim($item['duracao'] ?? '');
 
-                if ($medicamento_id <= 0 || $dosagem === '' || $posologia === '') {
-                    throw new Exception('Itens inválidos: medicamento, dosagem e posologia são obrigatórios.');
+                if ($medicamento_id <= 0 || $dosagem === '' || $frequencia === '') {
+                    throw new Exception('Itens inválidos: medicamento, dosagem e frequência são obrigatórios.');
                 }
-                
+
                 $ins->execute([
-                    ':r' => $rid, 
-                    ':med' => $medicamento_id, 
-                    ':dos' => $dosagem, 
-                    ':pos' => $posologia,
-                    ':qt' => $quantidade, 
-                    ':dur' => $duracao
+                    ':prescricao' => $rid,
+                    ':medicamento' => $medicamento_id,
+                    ':dosagem' => $dosagem,
+                    ':frequencia' => $frequencia,
+                    ':duracao' => $duracao
                 ]);
             }
 
             $pdo->commit();
-            echo json_encode([
-                'success' => true, 
-                'receita_id' => $rid
-            ], JSON_UNESCAPED_UNICODE);
-            
+            echo json_encode(['success' => true, 'receita_id' => $rid], JSON_UNESCAPED_UNICODE);
+
         } catch (Exception $e) {
             $pdo->rollBack();
             http_response_code(422);
@@ -169,11 +155,9 @@ try {
 
     http_response_code(405);
     echo json_encode(['error' => 'Método não permitido']);
-    
+
 } catch (Throwable $e) {
-    // Log do erro completo
-    error_log('Erro na API receitas: ' . $e->getMessage() . ' - ' . $e->getTraceAsString());
-    
+    error_log('Erro na API receitas: ' . $e->getMessage());
     http_response_code(500);
     echo json_encode([
         'error' => 'Erro no servidor',

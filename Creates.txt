@@ -47,10 +47,16 @@ CREATE TABLE atendimentos (
 CREATE TABLE prescricoes (
     id INT PRIMARY KEY AUTO_INCREMENT,
     atendimento_id int not null,
-    dosagem varchar(20) not NULL,
+    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE medicamentos_prescricao (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    medicamento_id int not null,
+    prescricao_id int not null,
+    dosagem varchar(20) not null,
     frequencia varchar(20) not null,
-    duracao varchar(20) not null,
-    criado_em date not null DEFAULT CURRENT_TIMESTAMP
+    duracao varchar(20) not null
 );
 
 Para login
@@ -70,3 +76,9 @@ ALTER TABLE `atendimentos`
 
 ALTER TABLE `prescricoes`
 	ADD CONSTRAINT `FK_prescricoes_atendimentos` FOREIGN KEY (`atendimento_id`) REFERENCES `atendimentos` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+ALTER TABLE `medicamentos_prescricao`
+	ADD CONSTRAINT `FK_medicamentos_prescricao_medicamento` FOREIGN KEY (`medicamento_id`) REFERENCES `medicamentos` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+ALTER TABLE `medicamentos_prescricao`
+	ADD CONSTRAINT `FK_medicamentos_prescricao_prescicao` FOREIGN KEY (`prescricao_id`) REFERENCES `prescricoes` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION;
