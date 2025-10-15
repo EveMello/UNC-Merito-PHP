@@ -135,7 +135,7 @@
 
                   <div class="row mb-3">
                     <div class="col-md-6">
-                      <label class="form-label">Nome</label>
+                      <label class="form-label required">Nome</label>
                       <input type="text" class="form-control" id="medicationName" maxlength="100" required />
                     </div>
                     <div class="col-md-6">
@@ -161,18 +161,18 @@
                       <input type="number" class="form-control" id="quantidade" />
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label">Unidade de Medida</label>
+                      <label class="form-label required">Unidade de Medida</label>
                       <input type="text" class="form-control" id="unidade_medida" maxlength="3" />
                     </div>
                   </div>
 
                   <div class="row mb-3">
                     <div class="col-md-6">
-                      <label class="form-label">Data de Validade</label>
+                      <label class="form-label required">Data de Validade</label>
                       <input type="date" class="form-control" id="data_validade" required />
                     </div>
                     <div class="col-md-6">
-                      <label class="form-label">Lote</label>
+                      <label class="form-label required">Lote</label>
                       <input type="text" class="form-control" id="lote" maxlength="50" />
                     </div>
                   </div>
@@ -234,8 +234,32 @@
 
       const getModal = () => bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
 
-      function showAlert(msg,type='success'){
-        alertContainer.innerHTML=`<div class="alert alert-${type} alert-dismissible fade show">${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
+      function showAlert(msg, type = 'success') {
+        const oldAlert = document.getElementById('floatingAlert');
+        if (oldAlert) oldAlert.remove();
+
+        // Cria o alerta flutuante
+        const alertDiv = document.createElement('div');
+        alertDiv.id = 'floatingAlert';
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.role = 'alert';
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+        alertDiv.innerHTML = `
+          ${msg}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        document.body.appendChild(alertDiv);
+
+        // Remove após 3 segundos
+        setTimeout(() => {
+          const al = bootstrap.Alert.getOrCreateInstance(alertDiv);
+          al.close();
+        }, 3000);
       }
 
       async function loadMedications(){

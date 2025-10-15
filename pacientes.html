@@ -136,19 +136,19 @@
                 <form id="newPatientForm">
                   <input type="hidden" id="patientId" />
                   <div class="mb-3">
-                    <label for="patientName" class="form-label">Nome</label>
+                    <label for="patientName" class="form-label required">Nome</label>
                     <input type="text" class="form-control" id="patientName" maxlength="100" required />
                   </div>
                   <div class="mb-3">
-                    <label for="patientCPF" class="form-label">CPF</label>
+                    <label for="patientCPF" class="form-label required">CPF</label>
                     <input type="text" class="form-control" id="patientCPF" maxlength="14" required />
                   </div>
                   <div class="mb-3">
-                    <label for="patientDOB" class="form-label">Data de Nascimento</label>
+                    <label for="patientDOB" class="form-label required">Data de Nascimento</label>
                     <input type="date" class="form-control" id="patientDOB" required />
                   </div>
                   <div class="mb-3">
-                    <label for="patientContact" class="form-label">Contato</label>
+                    <label for="patientContact" class="form-label required">Contato</label>
                     <input type="text" class="form-control" id="patientContact" maxlength="15" />
                   </div>
                   <div class="mb-3">
@@ -212,12 +212,32 @@
 
       const getModal = () => bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
 
-      function showAlert(msg, type='success') {
-        alertContainer.innerHTML = `
-          <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            ${msg}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>`;
+      function showAlert(msg, type = 'success') {
+        const oldAlert = document.getElementById('floatingAlert');
+        if (oldAlert) oldAlert.remove();
+
+        // Cria o alerta flutuante
+        const alertDiv = document.createElement('div');
+        alertDiv.id = 'floatingAlert';
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.role = 'alert';
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+        alertDiv.innerHTML = `
+          ${msg}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        document.body.appendChild(alertDiv);
+
+        // Remove após 3 segundos
+        setTimeout(() => {
+          const al = bootstrap.Alert.getOrCreateInstance(alertDiv);
+          al.close();
+        }, 3000);
       }
 
       // LISTAR
