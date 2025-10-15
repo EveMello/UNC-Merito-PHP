@@ -72,7 +72,10 @@ try {
     $medico_id       = trim($_POST['medico_id'] ?? '');
     $tipo            = trim($_POST['tipo'] ?? 'Consulta');
     $status          = trim($_POST['status'] ?? 'Pendente');
-    $data_atendimento= trim($_POST['data_atendimento'] ?? '');
+    $data_atendimento = trim($_POST['data_atendimento'] ?? '');
+    if (!$data_atendimento) {
+        $data_atendimento = date('Y-m-d'); // data atual
+    }
     $diagnostico     = trim($_POST['diagnostico'] ?? '');
     $cid             = trim($_POST['cid'] ?? '');
     $observacoes     = trim($_POST['observacoes'] ?? '');
@@ -108,15 +111,18 @@ try {
     $medico_id       = trim($data['medico_id'] ?? $data['medico'] ?? $data['profissional'] ?? '');
     $tipo            = trim($data['tipo'] ?? 'Consulta');
     $status          = trim($data['status'] ?? 'Pendente');
-    $data_atendimento= trim($data['data_atendimento'] ?? $data['data'] ?? '');
+    $data_atendimento = trim($data['data_atendimento'] ?? $data['data'] ?? '');
+    if (!$data_atendimento) {
+        $data_atendimento = date('Y-m-d'); // data atual
+    }
     $diagnostico     = trim($data['diagnostico'] ?? '');
     $cid             = trim($data['cid'] ?? '');
     $observacoes     = trim($data['observacoes'] ?? '');
     $remover_anexo   = !empty($data['remover_anexo']);
 
-    if ($paciente_id==='' || $medico_id==='' || $data_atendimento==='') {
+    if ($paciente_id==='' || $medico_id==='') {
       http_response_code(422);
-      echo json_encode(['error'=>'Preencha paciente, profissional e data.'], JSON_UNESCAPED_UNICODE);
+      echo json_encode(['error'=>'Preencha paciente e profissional.'], JSON_UNESCAPED_UNICODE);
       exit;
     }
 

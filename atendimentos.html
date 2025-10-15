@@ -126,28 +126,74 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label">Paciente</label>
-                  <select id="at_paciente" class="form-select" required></select>
+                  <div class="input-group">
+                    <select id="at_paciente" class="form-select" required></select>
+                    <button type="button" class="btn btn-outline-secondary mic-select" data-target="at_paciente">🎤</button>
+                  </div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Profissional</label>
-                  <select id="at_profissional" class="form-select" required></select>
+                  <div class="input-group">
+                    <select id="at_profissional" class="form-select" required></select>
+                    <button type="button" class="btn btn-outline-secondary mic-select" data-target="at_profissional">🎤</button>
+                  </div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Tipo</label>
-                  <select id="at_tipo" class="form-select">
-                    <option>Consulta</option><option>Urgência</option><option>Retorno</option><option>Outro</option>
-                  </select>
+                  <div class="input-group">
+                    <select id="at_tipo" class="form-select">
+                      <option>Consulta</option>
+                      <option>Urgência</option>
+                      <option>Retorno</option>
+                      <option>Outro</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary mic-select" data-target="at_tipo">🎤</button>
+                  </div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Status</label>
-                  <select id="at_status" class="form-select">
-                    <option>Em Andamento</option><option>Realizado</option><option>Pendente</option><option>Cancelado</option>
-                  </select>
+                  <div class="input-group">
+                    <select id="at_status" class="form-select">
+                      <option>Em Andamento</option>
+                      <option>Realizado</option>
+                      <option>Pendente</option>
+                      <option>Cancelado</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary mic-select" data-target="at_status">🎤</button>
+                  </div>
                 </div>
-                <div class="col-md-6"><label class="form-label">Data</label><input type="date" id="at_data" class="form-control" required></div>
-                <div class="col-md-6"><label class="form-label">Diagnóstico</label><input type="text" id="at_diagnostico" class="form-control"></div>
-                <div class="col-md-6"><label class="form-label">CID</label><input type="text" id="at_cid" class="form-control"></div>
-                <div class="col-12"><label class="form-label">Observações</label><textarea id="at_obs" class="form-control" rows="2"></textarea></div>
+                <div class="col-md-6">
+                  <label class="form-label">Data</label>
+                  <input type="date" id="at_data" class="form-control">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Diagnóstico</label>
+                  <div class="input-group">
+                    <input type="text" id="at_diagnostico" class="form-control">
+                    <button type="button" class="btn btn-outline-secondary mic-btn" data-target="at_diagnostico">
+                      🎤
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">CID</label>
+                  <div class="input-group">
+                    <input type="text" id="at_cid" class="form-control">
+                    <button type="button" class="btn btn-outline-secondary mic-btn" data-target="at_cid">
+                      🎤
+                    </button>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">Observações</label>
+                  <div class="input-group">
+                    <textarea id="at_obs" class="form-control" rows="2"></textarea>
+                    <button type="button" class="btn btn-outline-secondary mic-btn" data-target="at_obs">
+                      🎤
+                    </button>
+                  </div>
+                </div>
                 <div class="col-12">
                   <label class="form-label">Anexo (pdf, jpg, png, doc, docx)</label>
                   <input type="file" id="at_anexo" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
@@ -200,7 +246,6 @@
                           <label class="form-label">Médico</label>
                           <select id="medico_id" class="form-select" required></select>
                       </div>
-                      <!-- Adicione outros campos conforme necessário -->
                   </form>
               </div>
               <div class="modal-footer">
@@ -220,10 +265,34 @@
     const modalEl = document.getElementById('atendimentoModal');
     const modal = () => bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
 
-    function showAlert(msg,type='success'){
-      alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
-        ${msg}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
+    function showAlert(msg, type = 'success') {
+      const oldAlert = document.getElementById('floatingAlert');
+      if (oldAlert) oldAlert.remove();
+
+      // Cria o alerta flutuante
+      const alertDiv = document.createElement('div');
+      alertDiv.id = 'floatingAlert';
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.role = 'alert';
+      alertDiv.style.position = 'fixed';
+      alertDiv.style.top = '20px';
+      alertDiv.style.right = '20px';
+      alertDiv.style.zIndex = '9999';
+      alertDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+      alertDiv.innerHTML = `
+        ${msg}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+
+      document.body.appendChild(alertDiv);
+
+      // Remove após 3 segundos
+      setTimeout(() => {
+        const al = bootstrap.Alert.getOrCreateInstance(alertDiv);
+        al.close();
+      }, 3000);
     }
+
 
     //Carregar os pacientes no Atendimento
     async function loadPacientes(){
@@ -301,6 +370,87 @@
       document.getElementById('at_id').value = '';
     });
 
+    // -------------------- DITADO POR VOZ CAMPOS DE TEXTO--------------------
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'pt-BR';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      document.querySelectorAll('.mic-btn').forEach(btn => {
+        btn.disabled = false; // Garante habilitado quando suportado
+
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-target');
+          const field = document.getElementById(targetId);
+
+          field.focus();
+          recognition.start();
+
+          recognition.onresult = (event) => {
+            field.value = event.results[0][0].transcript;
+          };
+        });
+      });
+
+      recognition.onerror = () => alert('Erro ao capturar áudio. Verifique se o microfone está liberado!');
+    }
+    else {
+      // Se não tiver suporte, apenas desativa os botões de microfone
+      document.querySelectorAll('.mic-btn').forEach(btn => {
+        btn.disabled = true;
+        btn.title = "Reconhecimento de voz não suportado neste navegador"; // Dica ao passar o mouse
+      });
+    }
+
+    // -------------------- DITADO POR VOZ CAMPOS DE SELEÇÃO--------------------
+    if (SpeechRecognition) {
+
+      const normalize = str => str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+      document.querySelectorAll('.mic-select').forEach(btn => {
+        btn.disabled = false;
+
+        btn.addEventListener('click', () => {
+          const selectId = btn.getAttribute('data-target');
+          const selectEl = document.getElementById(selectId);
+
+          recognition.start();
+
+          recognition.onresult = (event) => {
+            const spoken = normalize(event.results[0][0].transcript.trim());
+            let matched = false;
+
+            for (let option of selectEl.options) {
+              const optNorm = normalize(option.textContent);
+
+              // Correspondência flexível: se parte da frase falada estiver na opção ou vice-versa
+              if (spoken.includes(optNorm) || optNorm.includes(spoken)) {
+                selectEl.value = option.value;
+                matched = true;
+                break;
+              }
+            }
+
+            if (!matched) {
+              alert(`Não encontrei uma opção correspondente para: "${spoken}"`);
+            }
+          };
+        });
+      });
+
+    } else {
+      document.querySelectorAll('.mic-select').forEach(btn => {
+        btn.disabled = true;
+        btn.title = "Reconhecimento de voz não suportado neste navegador";
+      });
+    }
+
+
+
     // Salvar (POST/PUT)
     document.getElementById('btnSalvar').addEventListener('click', async ()=>{
       const id  = document.getElementById('at_id').value.trim();
@@ -308,13 +458,17 @@
       const pro = document.getElementById('at_profissional').value.trim();
       const tip = document.getElementById('at_tipo').value.trim();
       const sta = document.getElementById('at_status').value.trim();
-      const dat = document.getElementById('at_data').value.trim();
+      let dat = document.getElementById('at_data').value.trim();
+      if(!dat) {
+        const hoje = new Date();
+        dat = hoje.toISOString().slice(0,10); // yyyy-mm-dd
+      }
       const diag= document.getElementById('at_diagnostico').value.trim();
       const cid = document.getElementById('at_cid').value.trim();
       const obs = document.getElementById('at_obs').value.trim();
       const anexo = document.getElementById('at_anexo').files[0];
 
-      if(!pac || !pro || !dat){ showAlert('Preencha paciente, profissional e data.','warning'); return; }
+      if(!pac || !pro){ showAlert('Preencha paciente e profissional.','warning'); return; }
 
       try{
         if(id){
