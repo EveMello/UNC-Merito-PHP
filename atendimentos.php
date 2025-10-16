@@ -1,4 +1,6 @@
-
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -26,7 +28,10 @@
         <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-user fa-fw"></i></a>
         <ul class="dropdown-menu dropdown-menu-end">
           <li><a class="dropdown-item" href="#">Configurações</a></li>
-          <li><a class="dropdown-item" href="#">Sair</a></li>
+          <form id="logoutForm" method="post" action="conexao.php">
+              <input type="hidden" name="action" value="logout">
+              <li><a class="dropdown-item" href="#" onclick="document.getElementById('logoutForm').submit();">Sair</a></li>
+          </form>
         </ul>
       </li>
     </ul>
@@ -39,7 +44,7 @@
         <div class="sb-sidenav-menu">
           <div class="nav">
             <div class="sb-sidenav-menu-heading">Principal</div>
-            <a class="nav-link" href="index.html"><div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+            <a class="nav-link" href="dashboard.php"><div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                 Dashboard
               </a>
               <div class="sb-sidenav-menu-heading">Gestão</div>
@@ -50,7 +55,7 @@
               </a>
               <div class="collapse" id="collapsePatients" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
                 <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="pacientes.html">Lista de Pacientes</a>
+                  <a class="nav-link" href="pacientes.php">Lista de Pacientes</a>
                 </nav>
               </div>
               <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseDoctors" aria-expanded="false" aria-controls="collapseDoctors">
@@ -60,20 +65,21 @@
               </a>
               <div class="collapse" id="collapseDoctors" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
                 <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="medicos.html">Lista de Médicos</a>
+                  <a class="nav-link" href="medicos.php">Lista de Médicos</a>
                 </nav>
               </div>
-              <a class="nav-link" href="medicamentos.html">
+              <a class="nav-link" href="medicamentos.php">
                 <div class="sb-nav-link-icon"><i class="fas fa-pills"></i></div>
                 Medicamentos
               </a>
-             <a class="nav-link active" href="atendimentos.html"><div class="sb-nav-link-icon"><i class="fas fa-notes-medical"></i></div>Atendimentos</a>
+             <a class="nav-link active" href="atendimentos.php"><div class="sb-nav-link-icon"><i class="fas fa-notes-medical"></i></div>Atendimentos</a>
             <!-- <a class="nav-link" href="consentimentos.php"><div class="sb-nav-link-icon"><i class="fas fa-file-signature"></i></div>Consentimentos</a> -->
             </div>
         </div>
         <div class="sb-sidenav-footer">
-          <div class="small">Logado como:</div>Administrador
-        </div>
+              <div class="small">Logado como:</div>
+              <?= isset($_SESSION['usuario_nome']) ? htmlspecialchars($_SESSION['usuario_nome'], ENT_QUOTES, 'UTF-8') : 'Visitante' ?>
+          </div>
       </nav>
     </div>
 
@@ -354,7 +360,7 @@
               <button class="btn btn-sm btn-info" data-action="detalhes">Detalhes</button>
               <button class="btn btn-sm btn-warning" data-action="editar">Editar</button>
               <button class="btn btn-sm btn-danger" data-action="excluir">Excluir</button>
-              <a href="receita.html?atendimento_id=${a.id}" class="btn btn-sm btn-success">Receita</a>
+              <a href="receita.php?atendimento_id=${a.id}" class="btn btn-sm btn-success">Receita</a>
             </td>`;
           tbody.appendChild(tr);
         });

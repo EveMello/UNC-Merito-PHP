@@ -65,7 +65,8 @@ CREATE TABLE usuarios (
     email VARCHAR(100) UNIQUE NOT NULL,
     senha VARCHAR(255) NOT NULL, -- Deve ser armazenada como hash por segurança
     nome VARCHAR(100),
-    perfil ENUM('ADMIN', 'USER') DEFAULT 'USER'
+    perfil ENUM('ADMIN', 'USER') DEFAULT 'USER',
+    aceite_termos TINYINT NOT NULL DEFAULT 0
 );
 
 ALTER TABLE `atendimentos`

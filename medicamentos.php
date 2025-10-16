@@ -1,3 +1,6 @@
+<?php
+session_start();
+?>
 <?php /* medicamentos.php - CRUD Medicamentos com sidebar */ ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -19,7 +22,7 @@
   <body class="sb-nav-fixed">
     <!-- NAVBAR -->
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-      <a class="navbar-brand ps-3" href="index.html">Prontuário Médico</a>
+      <a class="navbar-brand ps-3" href="dashboard.php">Prontuário Médico</a>
       <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle">
         <i class="fas fa-bars"></i>
       </button>
@@ -30,7 +33,10 @@
           </a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
             <li><a class="dropdown-item" href="#">Configurações</a></li>
-            <li><a class="dropdown-item" href="#">Sair</a></li>
+            <form id="logoutForm" method="post" action="conexao.php">
+              <input type="hidden" name="action" value="logout">
+              <li><a class="dropdown-item" href="#" onclick="document.getElementById('logoutForm').submit();">Sair</a></li>
+            </form>
           </ul>
         </li>
       </ul>
@@ -43,7 +49,7 @@
           <div class="sb-sidenav-menu">
             <div class="nav">
               <div class="sb-sidenav-menu-heading">Principal</div>
-              <a class="nav-link" href="index.html">
+              <a class="nav-link" href="dashboard.php">
                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                 Dashboard
               </a>
@@ -55,7 +61,7 @@
               </a>
               <div class="collapse" id="collapsePatients" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
                 <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="pacientes.html">Lista de Pacientes</a>
+                  <a class="nav-link" href="pacientes.php">Lista de Pacientes</a>
                 </nav>
               </div>
               <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseDoctors" aria-expanded="false" aria-controls="collapseDoctors">
@@ -65,21 +71,22 @@
               </a>
               <div class="collapse" id="collapseDoctors" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
                 <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="medicos.html">Lista de Médicos</a>
+                  <a class="nav-link" href="medicos.php">Lista de Médicos</a>
                 </nav>
               </div>
-              <a class="nav-link active" href="medicamentos.html">
+              <a class="nav-link active" href="medicamentos.php">
                 <div class="sb-nav-link-icon"><i class="fas fa-pills"></i></div>
                 Medicamentos
               </a>
-               <a class="nav-link" href="atendimentos.html"><div class="sb-nav-link-icon"><i class="fas fa-notes-medical"></i></div>Atendimentos</a>
+               <a class="nav-link" href="atendimentos.php"><div class="sb-nav-link-icon"><i class="fas fa-notes-medical"></i></div>Atendimentos</a>
             <!-- <a class="nav-link" href="receita.html"><div class="sb-nav-link-icon"><i class="fas fa-file-signature"></i></div>Receitas</a> -->
             </div>
           </div>
           <div class="sb-sidenav-footer">
-            <div class="small">Logado como:</div>
-            Administrador
+              <div class="small">Logado como:</div>
+              <?= isset($_SESSION['usuario_nome']) ? htmlspecialchars($_SESSION['usuario_nome'], ENT_QUOTES, 'UTF-8') : 'Visitante' ?>
           </div>
+      </nav>
         </nav>
       </div>
 
@@ -89,7 +96,7 @@
           <div class="container-fluid px-4">
             <h1 class="mt-4">Medicamentos</h1>
             <ol class="breadcrumb mb-4">
-              <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+              <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
               <li class="breadcrumb-item active">Medicamentos</li>
             </ol>
             <div class="card mb-4">

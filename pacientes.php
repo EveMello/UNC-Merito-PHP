@@ -1,12 +1,15 @@
-<?php /* medicos.php - CRUD de Médicos conectado */ ?>
+<?php
+session_start();
+?>
+<?php /* pacientes.php - CRUD conectado */ ?>
 <!DOCTYPE html>
 <html lang="pt-br">
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="Sistema de Prontuário Médico - Médicos" />
-    <title>Médicos - Sistema de Prontuário Médico</title>
+    <meta name="description" content="Sistema de Prontuário Médico - Pacientes" />
+    <title>Pacientes - Sistema de Prontuário Médico</title>
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
     <link href="css/styles.css" rel="stylesheet" />
@@ -16,19 +19,22 @@
       .card-body { padding:2rem; }
       table { margin-top:1rem; border-spacing:0 .5rem; width:100%; }
       table th { background-color:#f8f9fa; text-align:center; padding:.75rem; }
-      table td { background-color:#ffffff; text-align:center; padding:.75rem; border:1px solid #dee2e6; }
+      table td { background-color:#fff; text-align:center; padding:.75rem; border:1px solid #dee2e6; }
     </style>
   </head>
   <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-      <a class="navbar-brand ps-3" href="index.html">Prontuário Médico</a>
+      <a class="navbar-brand ps-3" href="dashboard.php">Prontuário Médico</a>
       <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle"><i class="fas fa-bars"></i></button>
       <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
             <li><a class="dropdown-item" href="#">Configurações</a></li>
-            <li><a class="dropdown-item" href="#">Sair</a></li>
+            <form id="logoutForm" method="post" action="conexao.php">
+              <input type="hidden" name="action" value="logout">
+              <li><a class="dropdown-item" href="#" onclick="document.getElementById('logoutForm').submit();">Sair</a></li>
+            </form>
           </ul>
         </li>
       </ul>
@@ -40,47 +46,47 @@
           <div class="sb-sidenav-menu">
             <div class="nav">
               <div class="sb-sidenav-menu-heading">Principal</div>
-              <a class="nav-link" href="index.html">
+              <a class="nav-link" href="dashboard.php">
                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                 Dashboard
               </a>
               <div class="sb-sidenav-menu-heading">Gestão</div>
-              <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePatients" aria-expanded="false" aria-controls="collapsePatients">
-                <div class="sb-nav-link-icon"><i class="fas fa-user-injured"></i></div>
-                Pacientes
+              <a class="nav-link" 
+                href="#" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#collapsePatients" 
+                aria-expanded="true" 
+                aria-controls="collapsePatients">
+                  <div class="sb-nav-link-icon"><i class="fas fa-user-injured"></i></div>
+                  Pacientes
+                  <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+              </a>
+              <div class="collapse show" id="collapsePatients" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                  <nav class="sb-sidenav-menu-nested nav">
+                      <a class="nav-link active" href="pacientes.php">Lista de Pacientes</a>
+                  </nav>
+              </div>
+              <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseDoctors" aria-expanded="false" aria-controls="collapseDoctors">
+                <div class="sb-nav-link-icon"><i class="fas fa-user-md"></i></div>
+                Médicos
                 <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
               </a>
-              <div class="collapse" id="collapsePatients" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+              <div class="collapse" id="collapseDoctors" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
                 <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="pacientes.html">Lista de Pacientes</a>
+                  <a class="nav-link" href="medicos.php">Lista de Médicos</a>
                 </nav>
               </div>
-                <a class="nav-link" 
-                  href="#" 
-                  data-bs-toggle="collapse" 
-                  data-bs-target="#collapseDoctors" 
-                  aria-expanded="true" 
-                  aria-controls="collapseDoctors">
-                    <div class="sb-nav-link-icon"><i class="fas fa-user-md"></i></div>
-                    Médicos
-                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                </a>
-              <div class="collapse show" id="collapseDoctors" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
-                <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link active" href="medicos.html">Lista de Médicos</a>
-                </nav>
-              </div>
-              <a class="nav-link" href="medicamentos.html">
+              <a class="nav-link" href="medicamentos.php">
                 <div class="sb-nav-link-icon"><i class="fas fa-pills"></i></div>
                 Medicamentos
               </a>
-            <a class="nav-link" href="atendimentos.html"><div class="sb-nav-link-icon"><i class="fas fa-notes-medical"></i></div>Atendimentos</a>
+             <a class="nav-link" href="atendimentos.php"><div class="sb-nav-link-icon"><i class="fas fa-notes-medical"></i></div>Atendimentos</a>
             <!-- <a class="nav-link" href="receita.html"><div class="sb-nav-link-icon"><i class="fas fa-file-signature"></i></div>Receitas</a> -->
             </div>
           </div>
           <div class="sb-sidenav-footer">
-            <div class="small">Logado como:</div>
-            Administrador
+              <div class="small">Logado como:</div>
+              <?= isset($_SESSION['usuario_nome']) ? htmlspecialchars($_SESSION['usuario_nome'], ENT_QUOTES, 'UTF-8') : 'Visitante' ?>
           </div>
         </nav>
       </div>
@@ -88,30 +94,35 @@
       <div id="layoutSidenav_content">
         <main>
           <div class="container-fluid px-4">
-            <h1 class="mt-4">Médicos</h1>
+            <h1 class="mt-4">Pacientes</h1>
             <ol class="breadcrumb mb-4">
-              <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
-              <li class="breadcrumb-item active">Médicos</li>
+              <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
+              <li class="breadcrumb-item active">Pacientes</li>
             </ol>
+
             <div class="card mb-4">
               <div class="card-header d-flex justify-content-between align-items-center">
-                <div><i class="fas fa-user-md"></i> Lista de Médicos</div>
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newDoctorModal" id="btnNovo">Novo Médico</button>
+                <div>
+                  <i class="fas fa-user-injured"></i>
+                  Lista de Pacientes
+                </div>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newPatientModal" id="btnNovo">Novo Paciente</button>
               </div>
               <div class="card-body">
                 <div id="alertContainer"></div>
-                <table id="doctorTable" class="table table-striped table-hover">
+                <table id="patientTable" class="table table-striped table-hover">
                   <thead>
                     <tr>
                       <th>Nome</th>
-                      <th>CRM</th>
-                      <th>Especialidade</th>
+                      <th>CPF</th>
+                      <th>Data de Nascimento</th>
                       <th>Contato</th>
+                      <th>Ativo</th>
                       <th>Ações</th>
                     </tr>
                   </thead>
-                  <tbody id="doctorTbody">
-                    <!-- linhas via JS -->
+                  <tbody id="patientTbody">
+                    <!-- linhas carregadas via JS -->
                   </tbody>
                 </table>
               </div>
@@ -120,37 +131,44 @@
         </main>
 
         <!-- Modal Criar/Editar -->
-        <div class="modal fade" id="newDoctorModal" tabindex="-1" aria-labelledby="newDoctorModalLabel" aria-hidden="true">
+        <div class="modal fade" id="newPatientModal" tabindex="-1" aria-labelledby="newPatientModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="newDoctorModalLabel">Novo Médico</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="newPatientModalLabel">Novo Paciente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
-                <form id="newDoctorForm">
-                  <input type="hidden" id="doctorId" />
+                <form id="newPatientForm">
+                  <input type="hidden" id="patientId" />
                   <div class="mb-3">
-                    <label for="doctorName" class="form-label required">Nome</label>
-                    <input type="text" class="form-control" id="doctorName" maxlength="100" required />
+                    <label for="patientName" class="form-label required">Nome</label>
+                    <input type="text" class="form-control" id="patientName" maxlength="100" required />
                   </div>
                   <div class="mb-3">
-                    <label for="doctorCRM" class="form-label required">CRM</label>
-                    <input type="text" class="form-control" id="doctorCRM" maxlength="20" required />
+                    <label for="patientCPF" class="form-label required">CPF</label>
+                    <input type="text" class="form-control" id="patientCPF" maxlength="14" required />
                   </div>
                   <div class="mb-3">
-                    <label for="doctorSpecialty" class="form-label required">Especialidade</label>
-                    <input type="text" class="form-control" id="doctorSpecialty" maxlength="50" required />
+                    <label for="patientDOB" class="form-label required">Data de Nascimento</label>
+                    <input type="date" class="form-control" id="patientDOB" required />
                   </div>
                   <div class="mb-3">
-                    <label for="doctorContact" class="form-label required">Contato</label>
-                    <input type="text" class="form-control" id="doctorContact" />
+                    <label for="patientContact" class="form-label required">Contato</label>
+                    <input type="text" class="form-control" id="patientContact" maxlength="15" />
+                  </div>
+                  <div class="mb-3">
+                    <label for="patientActive" class="form-label">Ativo</label>
+                    <select class="form-select" id="patientActive" required>
+                      <option value="Sim">Sim</option>
+                      <option value="Não">Não</option>
+                    </select>
                   </div>
                 </form>
               </div>
               <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button class="btn btn-primary" id="saveDoctorBtn">Salvar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="savePatientBtn">Salvar</button>
               </div>
             </div>
           </div>
@@ -161,12 +179,12 @@
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="detailsModalLabel">Detalhes do Médico</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="detailsModalLabel">Detalhes do Paciente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body" id="detailsContent"></div>
               <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
               </div>
             </div>
           </div>
@@ -177,7 +195,8 @@
             <div class="d-flex align-items-center justify-content-between small">
               <div class="text-muted">Copyright &copy; Mérito Health</div>
               <div>
-                <a href="#">Política de Privacidade</a> &middot;
+                <a href="#">Política de Privacidade</a>
+                &middot;
                 <a href="#">Termos &amp; Condições</a>
               </div>
             </div>
@@ -188,13 +207,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script>
-      const API = 'api/medicos.php';
+      const API = 'api/pacientes.php';
 
-      const tbody = document.getElementById('doctorTbody');
-      const saveBtn = document.getElementById('saveDoctorBtn');
+      const tbody = document.getElementById('patientTbody');
+      const saveBtn = document.getElementById('savePatientBtn');
       const alertContainer = document.getElementById('alertContainer');
-      const modalEl = document.getElementById('newDoctorModal');
-      const modalForm = document.getElementById('newDoctorForm');
+      const modalEl = document.getElementById('newPatientModal');
+      const modalForm = document.getElementById('newPatientForm');
       const detailsContent = document.getElementById('detailsContent');
 
       const getModal = () => bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
@@ -228,25 +247,28 @@
       }
 
       // LISTAR
-      async function loadDoctors() {
-        tbody.innerHTML = '<tr><td colspan="5">Carregando...</td></tr>';
+      async function loadPatients() {
+        tbody.innerHTML = '<tr><td colspan="6">Carregando...</td></tr>';
         try {
           const res = await fetch(API);
           const data = await res.json();
           if (!Array.isArray(data)) throw new Error('Resposta inesperada do servidor.');
+
           if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5">Nenhum médico cadastrado.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6">Nenhum paciente cadastrado.</td></tr>';
             return;
           }
+
           tbody.innerHTML = '';
-          data.forEach(m => {
+          data.forEach(p => {
             const tr = document.createElement('tr');
-            tr.dataset.id = m.id;
+            tr.dataset.id = p.id;
             tr.innerHTML = `
-              <td>${m.nome}</td>
-              <td>${m.crm}</td>
-              <td>${m.especialidade}</td>
-              <td>${m.contato}</td>
+              <td>${p.nome}</td>
+              <td>${p.cpf}</td>
+              <td>${p.data_nascimento}</td>
+              <td>${p.contato}</td>
+              <td>${p.ativo ? 'Sim' : 'Não'}</td>
               <td class="actions justify-content-center">
                 <button class="btn btn-sm btn-info" data-action="detalhes">Detalhes</button>
                 <button class="btn btn-sm btn-warning" data-action="editar">Editar</button>
@@ -255,52 +277,54 @@
             tbody.appendChild(tr);
           });
         } catch (e) {
-          tbody.innerHTML = `<tr><td colspan="5" class="text-danger">Erro ao carregar: ${e.message}</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="text-danger">Erro ao carregar: ${e.message}</td></tr>`;
         }
       }
 
       // CRIAR / ATUALIZAR
       saveBtn.addEventListener('click', async () => {
-        const id = document.getElementById('doctorId').value.trim();
-        const nome = document.getElementById('doctorName').value.trim();
-        const crm  = document.getElementById('doctorCRM').value.trim();
-        const especialidade = document.getElementById('doctorSpecialty').value.trim();
-        const contato = document.getElementById('doctorContact').value.trim();
+        const id = document.getElementById('patientId').value.trim();
+        const nome = document.getElementById('patientName').value.trim();
+        const cpf = document.getElementById('patientCPF').value.trim();
+        const data_nascimento = document.getElementById('patientDOB').value;
+        const contato = document.getElementById('patientContact').value.trim();
+        const ativo = document.getElementById('patientActive').value;
 
-        if (!nome || !crm || !especialidade || !contato) {
+        if (!nome || !cpf || !data_nascimento || !contato || !ativo) {
           showAlert('Preencha todos os campos obrigatórios.', 'warning');
           return;
         }
 
         try {
           if (id) {
-            // PUT
+            // PUT - atualizar
             const res = await fetch(API, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ id, nome, crm, especialidade, contato })
+              body: JSON.stringify({ id, nome, cpf, data_nascimento, contato, ativo })
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Falha ao atualizar.');
-            showAlert('Médico atualizado com sucesso!');
+            showAlert('Paciente atualizado com sucesso!');
           } else {
-            // POST
+            // POST - criar
             const fd = new FormData();
             fd.append('nome', nome);
-            fd.append('crm', crm);
-            fd.append('especialidade', especialidade);
+            fd.append('cpf', cpf);
+            fd.append('data_nascimento', data_nascimento);
             fd.append('contato', contato);
+            fd.append('ativo', ativo);
 
             const res = await fetch(API, { method: 'POST', body: fd });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Falha ao salvar.');
-            showAlert('Médico salvo com sucesso!');
+            showAlert('Paciente salvo com sucesso!');
           }
 
           getModal().hide();
           modalForm.reset();
-          document.getElementById('doctorId').value = '';
-          await loadDoctors();
+          document.getElementById('patientId').value = '';
+          await loadPatients();
         } catch (e) {
           showAlert(e.message, 'danger');
         }
@@ -308,23 +332,24 @@
 
       // Abrir modal como "novo"
       document.getElementById('btnNovo').addEventListener('click', () => {
-        document.getElementById('newDoctorModalLabel').innerText = 'Novo Médico';
+        document.getElementById('newPatientModalLabel').innerText = 'Novo Paciente';
         modalForm.reset();
-        document.getElementById('doctorId').value = '';
+        document.getElementById('patientId').value = '';
       });
 
-      // Detalhes / Editar / Excluir
+      // Delegação: detalhes/editar/excluir
       tbody.addEventListener('click', async (e) => {
         const btn = e.target.closest('button');
         if (!btn) return;
+
         const action = btn.dataset.action;
         const tr = btn.closest('tr');
         const id = tr?.dataset?.id;
 
         if (action === 'detalhes') {
           const tds = tr.querySelectorAll('td');
-          const labels = ['Nome', 'CRM', 'Especialidade', 'Contato'];
-          const html = Array.from(tds).slice(0,4).map((td,i)=>`<p><strong>${labels[i]}:</strong> ${td.textContent}</p>`).join('');
+          const labels = ['Nome', 'CPF', 'Data de Nascimento', 'Contato', 'Ativo'];
+          const html = Array.from(tds).slice(0,5).map((td,i)=>`<p><strong>${labels[i]}:</strong> ${td.textContent}</p>`).join('');
           detailsContent.innerHTML = html;
           new bootstrap.Modal(document.getElementById('detailsModal')).show();
           return;
@@ -332,24 +357,25 @@
 
         if (action === 'editar') {
           const tds = tr.querySelectorAll('td');
-          document.getElementById('newDoctorModalLabel').innerText = 'Editar Médico';
-          document.getElementById('doctorId').value = id;
-          document.getElementById('doctorName').value = tds[0].textContent;
-          document.getElementById('doctorCRM').value = tds[1].textContent;
-          document.getElementById('doctorSpecialty').value = tds[2].textContent;
-          document.getElementById('doctorContact').value = tds[3].textContent;
+          document.getElementById('newPatientModalLabel').innerText = 'Editar Paciente';
+          document.getElementById('patientId').value = id;
+          document.getElementById('patientName').value = tds[0].textContent;
+          document.getElementById('patientCPF').value = tds[1].textContent;
+          document.getElementById('patientDOB').value = tds[2].textContent; // yyyy-mm-dd
+          document.getElementById('patientContact').value = tds[3].textContent;
+          document.getElementById('patientActive').value = (tds[4].textContent === 'Sim') ? 'Sim' : 'Não';
           new bootstrap.Modal(modalEl).show();
           return;
         }
 
         if (action === 'excluir') {
-          if (!confirm('Deseja excluir este médico?')) return;
+          if (!confirm('Deseja excluir este paciente?')) return;
           try {
             const res = await fetch(`${API}?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Falha ao excluir.');
-            showAlert('Médico excluído com sucesso!');
-            await loadDoctors();
+            showAlert('Paciente excluído com sucesso!');
+            await loadPatients();
           } catch (e) {
             showAlert(e.message, 'danger');
           }
@@ -357,7 +383,7 @@
       });
 
       // Inicializa
-      loadDoctors();
+      loadPatients();
     </script>
   </body>
 </html>

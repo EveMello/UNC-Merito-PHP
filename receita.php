@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -30,7 +34,7 @@
 <body class="sb-nav-fixed">
   <!-- NAVBAR -->
   <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-    <a class="navbar-brand ps-3" href="index.html">Prontuário Médico</a>
+    <a class="navbar-brand ps-3" href="dashboard.php">Prontuário Médico</a>
     <button class="btn btn-link btn-sm me-4" id="sidebarToggle"><i class="fas fa-bars"></i></button>
   </nav>
 
@@ -41,16 +45,19 @@
         <div class="sb-sidenav-menu">
           <div class="nav">
             <div class="sb-sidenav-menu-heading">Principal</div>
-            <a class="nav-link" href="index.html"><div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>Dashboard</a>
+            <a class="nav-link" href="dashboard.php"><div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>Dashboard</a>
             <div class="sb-sidenav-menu-heading">Gestão</div>
-            <a class="nav-link" href="pacientes.html"><div class="sb-nav-link-icon"><i class="fas fa-user-injured"></i></div>Pacientes</a>
-            <a class="nav-link" href="medicos.html"><div class="sb-nav-link-icon"><i class="fas fa-user-md"></i></div>Médicos</a>
-            <a class="nav-link" href="medicamentos.html"><div class="sb-nav-link-icon"><i class="fas fa-pills"></i></div>Medicamentos</a>
-            <a class="nav-link" href="atendimentos.html"><div class="sb-nav-link-icon"><i class="fas fa-notes-medical"></i></div>Atendimentos</a>
+            <a class="nav-link" href="pacientes.php"><div class="sb-nav-link-icon"><i class="fas fa-user-injured"></i></div>Pacientes</a>
+            <a class="nav-link" href="medicos.php"><div class="sb-nav-link-icon"><i class="fas fa-user-md"></i></div>Médicos</a>
+            <a class="nav-link" href="medicamentos.php"><div class="sb-nav-link-icon"><i class="fas fa-pills"></i></div>Medicamentos</a>
+            <a class="nav-link" href="atendimentos.php"><div class="sb-nav-link-icon"><i class="fas fa-notes-medical"></i></div>Atendimentos</a>
             <!-- <a class="nav-link active" href="receita.html"><div class="sb-nav-link-icon"><i class="fas fa-file-prescription"></i></div>Receitas</a> -->
           </div>
         </div>
-        <div class="sb-sidenav-footer"><div class="small">Logado como:</div>Administrador</div>
+        <div class="sb-sidenav-footer">
+              <div class="small">Logado como:</div>
+              <?= isset($_SESSION['usuario_nome']) ? htmlspecialchars($_SESSION['usuario_nome'], ENT_QUOTES, 'UTF-8') : 'Visitante' ?>
+          </div>
       </nav>
     </div>
 
@@ -60,7 +67,7 @@
         <div class="container-fluid px-4">
           <h1 class="mt-4">Geração de Receita</h1>
           <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
             <li class="breadcrumb-item active">Receitas</li>
           </ol>
 
